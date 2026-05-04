@@ -510,16 +510,194 @@ a{text-decoration:none;color:inherit}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* ── RESPONSIVE ─────────────────────────────────────────── */
-@media(max-width:900px){
+
+/* ── TABLET (max 1024px) ── */
+@media(max-width:1024px){
+  :root{--sidebar:190px}
   .quy-stats{grid-template-columns:repeat(2,1fr)}
-}
-@media(max-width:700px){
-  .sidebar{width:100%;height:auto;position:relative;flex-direction:row;overflow-x:auto}
-  .main{margin-left:0}
-  .tx-col-cat,.tx-col-date{display:none}
+  .tx-col-cat{display:none}
+  .mc-sum-amount{font-size:17px}
 }
 
-/* ── MISC ───────────────────────────────────────────────── */
+/* ── MOBILE (max 700px) ── */
+@media(max-width:700px){
+  :root{
+    --sidebar:0px;
+    --topbar:52px;
+  }
+
+  /* Sidebar becomes bottom nav */
+  .sidebar{
+    width:100%;height:auto;
+    position:fixed;bottom:0;left:0;top:auto;
+    flex-direction:row;overflow-x:auto;overflow-y:hidden;
+    border-right:none;border-top:1px solid var(--border);
+    z-index:200;padding:0;
+    -webkit-overflow-scrolling:touch;
+  }
+  .sidebar-brand{display:none}
+  .sidebar-nav{
+    display:flex;flex-direction:row;
+    padding:0;flex:1;overflow-x:auto;
+    gap:0;
+  }
+  .nav-section-label{display:none}
+  .nav-item{
+    flex-direction:column;gap:2px;min-width:56px;
+    padding:8px 6px;font-size:10px;
+    border-radius:0;text-align:center;
+    justify-content:center;align-items:center;
+    white-space:nowrap;
+  }
+  .nav-item .nav-icon{font-size:20px;width:auto}
+  .sidebar-footer{
+    padding:0;border-top:none;border-left:1px solid var(--border);
+    flex-shrink:0;
+  }
+  .nav-item.logout{flex-direction:column;gap:2px;padding:8px 6px;font-size:10px}
+
+  /* Main adjusts for bottom nav */
+  .main{
+    margin-left:0;
+    padding-bottom:70px;
+  }
+
+  /* Topbar */
+  .topbar{padding:0 12px;height:var(--topbar)}
+  .topbar-title{font-size:14px}
+  .year-label{font-size:13px;min-width:40px}
+  .btn-primary{font-size:12px;padding:7px 11px}
+  .btn-primary span{display:none}
+
+  /* Content */
+  .content{padding:12px}
+
+  /* Month cards */
+  .mc-header{padding:10px 12px;gap:6px}
+  .mc-title{font-size:14px}
+  .mc-btn{padding:4px 8px;font-size:11px}
+  .mc-sum-col{padding:10px 12px}
+  .mc-sum-amount{font-size:16px}
+  .mc-sum-label{font-size:10px}
+  .mc-sum-count{font-size:11px}
+  .mc-footer{padding:8px 12px;flex-wrap:wrap;gap:4px}
+  .mc-footer-stat{font-size:12px}
+  .mc-section{padding:10px 12px}
+  .mc-row{font-size:12px}
+
+  /* Quy page */
+  .quy-header{padding:14px 16px}
+  .quy-name{font-size:16px}
+  .quy-icon-big{font-size:24px}
+  .quy-stats{grid-template-columns:repeat(2,1fr);gap:8px}
+  .stat-card{padding:10px 12px}
+  .stat-card-value{font-size:15px}
+
+  /* Transaction table */
+  .tx-table-header{display:none}
+  .tx-row{
+    flex-wrap:wrap;padding:10px 12px;gap:4px;
+    position:relative;
+  }
+  .tx-col-date{width:auto;font-size:11px;color:var(--muted)}
+  .tx-col-desc{flex:1 0 calc(100% - 80px);font-size:13px;padding:0}
+  .tx-col-anh,.tx-col-em{width:auto;font-size:12px;text-align:left}
+  .tx-col-cat,.tx-col-date{display:none}
+  .tx-col-actions{
+    position:absolute;top:10px;right:8px;
+    width:auto;
+  }
+  .tx-row.total-row .tx-col-desc{font-size:13px}
+
+  /* Modals */
+  .modal-overlay{padding:0;align-items:flex-end}
+  .modal{
+    border-radius:18px 18px 0 0;
+    max-height:92vh;
+    max-width:100%!important;
+  }
+  .modal-header{border-radius:18px 18px 0 0;padding:16px 18px 12px}
+  .modal-body{padding:14px 18px}
+  .modal-footer{padding:12px 18px}
+  .field-row,.field-row-3{grid-template-columns:1fr!important}
+
+  /* Item rows in month modal */
+  .item-row{gap:6px;padding:6px 8px}
+  .item-row .item-amount{width:110px;font-size:13px}
+  .item-row .item-name{font-size:13px}
+
+  /* Toast */
+  #toast-container{bottom:80px;right:12px;left:12px}
+  .toast{min-width:auto;max-width:100%}
+
+  /* Login box */
+  .login-box{padding:28px 20px;border-radius:16px}
+}
+
+/* ── VERY SMALL (max 400px) ── */
+@media(max-width:400px){
+  .mc-summary{grid-template-columns:1fr}
+  .mc-sum-col:first-child{border-right:none;border-bottom:1px solid var(--border)}
+  .quy-stats{grid-template-columns:1fr 1fr}
+}
+
+/* ── MENU TOGGLE (mobile only) ─────────────────────────── */
+.menu-toggle{
+  display:none;
+  background:transparent;border:none;
+  flex-direction:column;gap:5px;
+  padding:4px;cursor:pointer;
+  width:32px;flex-shrink:0;
+}
+.menu-toggle span{
+  display:block;width:22px;height:2px;
+  background:var(--muted);border-radius:2px;
+  transition:all .2s;
+}
+.menu-toggle:hover span{background:var(--text)}
+@media(max-width:700px){
+  .menu-toggle{display:flex}
+}
+
+/* Sidebar overlay on mobile */
+.sidebar-overlay{
+  display:none;
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.5);z-index:199;
+}
+.sidebar-overlay.show{display:block}
+@media(max-width:700px){
+  .sidebar{
+    transform:translateX(-100%);
+    transition:transform .25s ease;
+    flex-direction:column;
+    width:240px!important;height:100vh!important;
+    bottom:auto!important;left:0;top:0;
+    overflow-y:auto;overflow-x:hidden;
+    position:fixed;
+  }
+  .sidebar.mobile-open{transform:translateX(0)}
+  .sidebar-brand{display:flex!important}
+  .sidebar-nav{flex-direction:column;padding:12px 8px}
+  .nav-section-label{display:block}
+  .nav-item{
+    flex-direction:row;font-size:13px;
+    padding:9px 10px;min-width:auto;
+    border-radius:var(--r2);text-align:left;
+    justify-content:flex-start;
+  }
+  .nav-item .nav-icon{font-size:16px;width:20px}
+  .sidebar-footer{padding:12px 8px;border-top:1px solid var(--border);border-left:none}
+  .nav-item.logout{flex-direction:row;font-size:13px;padding:9px 10px}
+  .main{padding-bottom:0}
+  #toast-container{bottom:16px}
+}
+.btn-short-text{display:none}
+@media(max-width:700px){
+  .btn-full-text{display:none}
+  .btn-short-text{display:inline;font-size:16px;font-weight:900}
+  .btn-primary{padding:7px 12px!important}
+}
 .divider{height:1px;background:var(--border);margin:16px 0}
 .text-muted{color:var(--muted)}
 .font-mono{font-variant-numeric:tabular-nums}
@@ -595,6 +773,9 @@ select.field-input option{background:var(--s2)}
   <!-- MAIN -->
   <main class="main">
     <div class="topbar">
+      <button class="menu-toggle" id="menu-toggle" onclick="toggleMobileMenu()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
       <div class="topbar-title" id="topbar-title">Của Anh</div>
       <div class="topbar-right">
         <div class="year-nav" id="year-nav">
@@ -603,7 +784,7 @@ select.field-input option{background:var(--s2)}
           <button class="year-btn" onclick="changeYear(1)">›</button>
         </div>
         <button class="btn-primary" id="topbar-add-btn" onclick="topbarAddClick()">
-          + Thêm Tháng
+          <span class="btn-full-text">+ Thêm Tháng</span><span class="btn-short-text">+</span>
         </button>
       </div>
     </div>
@@ -619,6 +800,9 @@ select.field-input option{background:var(--s2)}
     </div>
   </main>
 </div>
+
+<!-- Sidebar overlay for mobile -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileMenu()"></div>
 
 <!-- ════════════════ MODALS ════════════════ -->
 
@@ -754,6 +938,18 @@ select.field-input option{background:var(--s2)}
 
 <!-- ════════════════ SCRIPT ════════════════ -->
 <script>
+// ── MOBILE MENU ──────────────────────────────────────────
+function toggleMobileMenu() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.toggle('mobile-open');
+  overlay.classList.toggle('show');
+}
+function closeMobileMenu() {
+  document.querySelector('.sidebar').classList.remove('mobile-open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
+}
+
 // ── CONFIG ──────────────────────────────────────────────
 const SUPABASE_URL     = 'https://rnsjiqbbeywgbnqsojce.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJuc2ppcWJiZXl3Z2JucXNvamNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0OTExNjAsImV4cCI6MjA5MzA2NzE2MH0.1BrlS__GNAMFbBmudl6gUJwJ9j_zoDdAj9rtfhBkhdk';
@@ -845,6 +1041,7 @@ async function initApp() {
 // ── NAVIGATION ───────────────────────────────────────────
 function navigateTo(page) {
   S.page = page;
+  closeMobileMenu();
   // Update nav items
   document.querySelectorAll('.nav-item[id^="nav-"]').forEach(el => {
     el.classList.remove('active','active-anh','active-em');
@@ -1202,15 +1399,40 @@ function openMonthModal(owner, year, month) {
   openModalById('modal-month');
 }
 
+function formatAmountDisplay(val) {
+  const n = parseFloat(String(val).replace(/[.,\s]/g,'').replace(/[^0-9]/g,''));
+  if(!n || isNaN(n)) return '';
+  return n.toLocaleString('vi-VN');
+}
+
+function parseAmountInput(val) {
+  return parseFloat(String(val).replace(/\./g,'').replace(/,/g,'.').replace(/[^0-9.]/g,'')) || 0;
+}
+
 function addItemRow(type, name='', amount='') {
   const container = document.getElementById(type+'-items');
   const row = document.createElement('div');
   row.className = 'item-row';
+  const displayVal = amount ? formatAmountDisplay(amount) : '';
   row.innerHTML = `
     <input class="item-name" placeholder="Tên khoản..." value="${name}">
-    <input class="item-amount" type="number" placeholder="0" value="${amount}" style="color:${type==='income'?'var(--green)':'var(--red)'}">
+    <input class="item-amount" type="text" inputmode="numeric" placeholder="0" value="${displayVal}" style="color:${type==='income'?'var(--green)':'var(--red)'}">
     <button class="item-del" onclick="this.parentElement.remove()">✕</button>`;
   container.appendChild(row);
+  // Format on blur, allow raw typing
+  const amtInput = row.querySelector('.item-amount');
+  amtInput.addEventListener('focus', function() {
+    const raw = parseAmountInput(this.value);
+    this.value = raw ? String(raw) : '';
+  });
+  amtInput.addEventListener('blur', function() {
+    const raw = parseAmountInput(this.value);
+    this.value = raw ? formatAmountDisplay(raw) : '';
+  });
+  amtInput.addEventListener('input', function() {
+    // Allow only digits, dots, commas
+    this.value = this.value.replace(/[^0-9.,]/g,'');
+  });
   row.querySelector('.item-name').focus();
 }
 
@@ -1224,7 +1446,7 @@ async function saveMonth() {
     return Array.from(document.querySelectorAll(`#${type}-items .item-row`))
       .map(row => ({
         name:   row.querySelector('.item-name').value.trim(),
-        amount: parseFloat(row.querySelector('.item-amount').value) || 0,
+        amount: parseAmountInput(row.querySelector('.item-amount').value),
       }))
       .filter(i => i.name);
   };
