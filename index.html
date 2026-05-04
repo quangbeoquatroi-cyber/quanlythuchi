@@ -1419,19 +1419,17 @@ function addItemRow(type, name='', amount='') {
     <input class="item-amount" type="text" inputmode="numeric" placeholder="0" value="${displayVal}" style="color:${type==='income'?'var(--green)':'var(--red)'}">
     <button class="item-del" onclick="this.parentElement.remove()">✕</button>`;
   container.appendChild(row);
-  // Format on blur, allow raw typing
+
   const amtInput = row.querySelector('.item-amount');
-  amtInput.addEventListener('focus', function() {
-    const raw = parseAmountInput(this.value);
-    this.value = raw ? String(raw) : '';
-  });
-  amtInput.addEventListener('blur', function() {
-    const raw = parseAmountInput(this.value);
-    this.value = raw ? formatAmountDisplay(raw) : '';
-  });
   amtInput.addEventListener('input', function() {
-    // Allow only digits, dots, commas
-    this.value = this.value.replace(/[^0-9.,]/g,'');
+    // Strip everything except digits
+    const digits = this.value.replace(/\D/g, '');
+    if (!digits) { this.value = ''; return; }
+    const num = parseInt(digits, 10);
+    // Format with dots (vi-VN style)
+    const formatted = num.toLocaleString('vi-VN');
+    // Preserve cursor at end
+    this.value = formatted;
   });
   row.querySelector('.item-name').focus();
 }
