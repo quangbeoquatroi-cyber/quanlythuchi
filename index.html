@@ -1463,28 +1463,26 @@ function openTxDetail(txId, quyKey) {
   const q  = S.quyCache[quyKey];
   const tx = (q?.transactions||[]).find(t => t.id === txId);
   if(!tx) return;
-  const isIn      = tx.type === 'in';
-  const anhAmt    = tx.amount_anh || 0;
-  const emAmt     = tx.amount_em  || 0;
-  const total     = anhAmt + emAmt;
-  const accentColor   = isIn ? 'var(--green)' : 'var(--red)';
-  const accentColorHex= isIn ? '#26d98b'      : '#ff5252';
-  const typeLabel     = isIn ? 'Nạp tiền'     : 'Chi tiền';
-  const typeIcon      = isIn ? '📥'            : '🗂️';
-  const badgeArrow    = isIn ? '↓'             : '↑';
-  const variantClass  = isIn ? 'dtv-in'        : 'dtv-out';
+  const isIn           = tx.type === 'in';
+  const anhAmt         = tx.amount_anh || 0;
+  const emAmt          = tx.amount_em  || 0;
+  const total          = anhAmt + emAmt;
+  const accentColorHex = isIn ? '#26d98b' : '#ff5252';
+  const typeLabel      = isIn ? 'Nạp tiền' : 'Chi tiền';
+  const typeIcon       = isIn ? '📥' : '🗂️';
+  const badgeArrow     = isIn ? '↓' : '↑';
+  const variantClass   = isIn ? 'dtv-in' : 'dtv-out';
 
-  // compute running balance from quy snapshot
+  // running balance
   const allTx = (q.transactions || []);
   let totalNap = 0, totalChi = 0;
   allTx.forEach(t => {
-    if(t.type === 'in')  totalNap += (t.amount_anh||0) + (t.amount_em||0);
-    else                 totalChi += (t.amount_anh||0) + (t.amount_em||0);
+    if(t.type === 'in') totalNap += (t.amount_anh||0) + (t.amount_em||0);
+    else                totalChi += (t.amount_anh||0) + (t.amount_em||0);
   });
   const conLai = totalNap - totalChi;
-  const anhDong = q.totalAnh || anhAmt;
 
-  // contributor rows
+  // contributor rows — bỏ dòng Số tiền; đổi label theo loại
   const contribRows = [];
   if(anhAmt) contribRows.push(`
     <div class="dtv-info-row">
@@ -1494,198 +1492,220 @@ function openTxDetail(txId, quyKey) {
       </div>
       <span class="dtv-info-val" style="color:var(--anh)">${fmtVND(anhAmt)}</span>
     </div>`);
-  if(emAmt) contribRows.push(`
+  if(emAmt) {
+    const emLabel = isIn ? 'Em đóng' : 'Em thanh toán';
+    contribRows.push(`
     <div class="dtv-info-row">
       <div class="dtv-info-left">
-        <div class="dtv-info-icon" style="background:rgba(249,168,37,.15)">🥰</div>
-        <span class="dtv-info-label">Em đóng</span>
+        <div class="dtv-info-icon" style="background:rgba(249,168,37,.15)">${isIn ? '🥰' : '💗'}</div>
+        <span class="dtv-info-label">${emLabel}</span>
       </div>
       <span class="dtv-info-val" style="color:var(--em)">${fmtVND(emAmt)}</span>
     </div>`);
+  }
 
   const detail = `
     <style>
+      /* ── DTV styles (scoped via .dtv-out / .dtv-in) ── */
+      .dtv-body{padding:0 4px}
       .dtv-hero{
-        margin:0 0 14px;
-        border-radius:16px;padding:18px 18px 16px;
+        margin:0 0 18px;
+        border-radius:16px;
+        padding:20px 20px 18px;
         position:relative;overflow:hidden;
-        display:flex;align-items:center;gap:14px;
+        display:flex;align-items:center;gap:16px;
       }
-      .dtv-out .dtv-hero{background:linear-gradient(135deg,rgba(255,82,82,.2),rgba(255,82,82,.07))}
-      .dtv-in  .dtv-hero{background:linear-gradient(135deg,rgba(38,217,139,.2),rgba(38,217,139,.07))}
+      .dtv-out .dtv-hero{background:linear-gradient(140deg,rgba(255,82,82,.22),rgba(255,82,82,.06))}
+      .dtv-in  .dtv-hero{background:linear-gradient(140deg,rgba(38,217,139,.22),rgba(38,217,139,.06))}
       .dtv-hero::after{
-        content:'';position:absolute;top:-40px;right:-40px;
-        width:130px;height:130px;border-radius:50%;
-        opacity:.07;pointer-events:none;
+        content:'';position:absolute;top:-50px;right:-50px;
+        width:150px;height:150px;border-radius:50%;
+        opacity:.06;pointer-events:none;
       }
       .dtv-out .dtv-hero::after{background:#ff5252}
       .dtv-in  .dtv-hero::after{background:#26d98b}
       .dtv-icon-wrap{
-        width:60px;height:60px;border-radius:50%;
+        width:64px;height:64px;border-radius:50%;
         display:flex;align-items:center;justify-content:center;
-        font-size:26px;flex-shrink:0;position:relative;
+        font-size:28px;flex-shrink:0;position:relative;
       }
       .dtv-out .dtv-icon-wrap{background:rgba(255,82,82,.18);color:#ff5252}
       .dtv-in  .dtv-icon-wrap{background:rgba(38,217,139,.18);color:#26d98b}
       .dtv-icon-wrap::before{
         content:'';position:absolute;inset:-3px;border-radius:50%;
-        border:2px solid currentColor;opacity:.4;
+        border:2px solid currentColor;opacity:.35;
       }
       .dtv-badge{
-        position:absolute;bottom:1px;right:1px;
-        width:20px;height:20px;border-radius:50%;
+        position:absolute;bottom:2px;right:2px;
+        width:21px;height:21px;border-radius:50%;
         display:flex;align-items:center;justify-content:center;
-        font-size:10px;font-weight:900;
+        font-size:11px;font-weight:900;line-height:1;
       }
       .dtv-out .dtv-badge{background:#ff5252;color:#fff}
       .dtv-in  .dtv-badge{background:#26d98b;color:#071a14}
       .dtv-hero-info{flex:1;min-width:0}
-      .dtv-type{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+      .dtv-type{
+        font-size:11px;font-weight:800;text-transform:uppercase;
+        letter-spacing:.12em;margin-bottom:5px;
+      }
       .dtv-out .dtv-type{color:#ff5252}
       .dtv-in  .dtv-type{color:#26d98b}
-      .dtv-amount{font-size:28px;font-weight:900;letter-spacing:-.5px;line-height:1}
+      .dtv-amount{font-size:30px;font-weight:900;letter-spacing:-.5px;line-height:1}
       .dtv-out .dtv-amount{color:#ff5252}
       .dtv-in  .dtv-amount{color:#26d98b}
-      .dtv-date{font-size:12px;font-weight:600;color:var(--muted);margin-top:5px;display:flex;align-items:center;gap:4px}
-      .dtv-status{
-        position:absolute;top:14px;right:14px;
-        background:rgba(38,217,139,.18);border:1px solid rgba(38,217,139,.4);
-        border-radius:20px;padding:4px 10px;
-        font-size:11px;font-weight:700;color:#26d98b;
-        display:flex;align-items:center;gap:4px;
+      .dtv-date{
+        font-size:12px;font-weight:600;color:var(--muted);
+        margin-top:7px;display:flex;align-items:center;gap:5px;
       }
-      .dtv-section{font-size:13px;font-weight:800;color:var(--text);margin-bottom:8px;letter-spacing:-.2px}
+      .dtv-status{
+        position:absolute;top:16px;right:16px;
+        background:rgba(38,217,139,.18);border:1px solid rgba(38,217,139,.4);
+        border-radius:20px;padding:5px 11px;
+        font-size:11px;font-weight:700;color:#26d98b;
+        display:flex;align-items:center;gap:4px;white-space:nowrap;
+      }
+      .dtv-section{
+        font-size:14px;font-weight:800;color:var(--text);
+        margin:0 0 10px;letter-spacing:-.2px;
+      }
       .dtv-card{
         background:var(--s2);border:1px solid var(--border);
-        border-radius:14px;overflow:hidden;margin-bottom:14px;
+        border-radius:14px;overflow:hidden;margin-bottom:18px;
       }
       .dtv-info-row{
         display:flex;align-items:center;justify-content:space-between;
-        padding:12px 14px;border-bottom:1px solid var(--border);gap:10px;
+        padding:14px 16px;border-bottom:1px solid var(--border);gap:12px;
       }
       .dtv-info-row:last-child{border-bottom:none}
-      .dtv-info-left{display:flex;align-items:center;gap:9px}
+      .dtv-info-left{display:flex;align-items:center;gap:10px;flex-shrink:0}
       .dtv-info-icon{
-        width:30px;height:30px;border-radius:8px;
+        width:32px;height:32px;border-radius:9px;
         display:flex;align-items:center;justify-content:center;
-        font-size:15px;flex-shrink:0;
+        font-size:16px;flex-shrink:0;
       }
-      .dtv-info-label{font-size:13px;font-weight:600;color:var(--muted)}
-      .dtv-info-val{font-size:13px;font-weight:700;color:var(--text);text-align:right;max-width:55%}
+      .dtv-info-label{font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap}
+      .dtv-info-val{
+        font-size:13px;font-weight:700;color:var(--text);
+        text-align:right;word-break:break-word;
+      }
       .dtv-balance-grid{
-        display:grid;grid-template-columns:repeat(4,1fr);
-        gap:8px;padding:14px;
+        display:grid;grid-template-columns:repeat(3,1fr);
+        gap:0;
       }
-      .dtv-bal-item{text-align:center}
+      .dtv-bal-item{
+        text-align:center;padding:14px 8px;
+        border-right:1px solid var(--border);
+      }
+      .dtv-bal-item:last-child{border-right:none}
       .dtv-bal-label{
         font-size:9px;font-weight:800;color:var(--muted);
         text-transform:uppercase;letter-spacing:.07em;
-        margin-bottom:5px;display:flex;align-items:center;justify-content:center;gap:3px;
+        margin-bottom:6px;
       }
-      .dtv-bal-amt{font-size:12px;font-weight:800}
+      .dtv-bal-amt{font-size:13px;font-weight:800;line-height:1.2}
+      .dtv-actions{display:flex;gap:10px;margin-top:2px}
+      .dtv-btn-outline{
+        flex:1;padding:14px 10px;
+        border-radius:12px;border:1.5px solid var(--border2);
+        background:transparent;color:var(--muted);
+        font-size:13px;font-weight:700;font-family:inherit;
+        cursor:pointer;transition:all .15s;
+        display:flex;align-items:center;justify-content:center;gap:6px;
+      }
+      .dtv-btn-outline:hover{background:var(--s3);color:var(--text)}
+      .dtv-btn-solid{
+        flex:2;padding:14px 10px;
+        border-radius:12px;border:none;
+        background:linear-gradient(135deg,var(--green),#00bfa5);
+        color:#071a14;font-size:13px;font-weight:800;font-family:inherit;
+        cursor:pointer;transition:opacity .15s;
+        display:flex;align-items:center;justify-content:center;gap:6px;
+      }
+      .dtv-btn-solid:hover{opacity:.88}
     </style>
 
     <div class="${variantClass}">
-      <!-- Hero -->
-      <div class="dtv-hero">
-        <div class="dtv-icon-wrap">
-          ${typeIcon}
-          <div class="dtv-badge">${badgeArrow}</div>
-        </div>
-        <div class="dtv-hero-info">
-          <div class="dtv-type">${typeLabel}</div>
-          <div class="dtv-amount">${fmtVND(total)}</div>
-          <div class="dtv-date">📅 ${fmtDate(tx.date)}</div>
-        </div>
-        <div class="dtv-status">✅ Thành công</div>
-      </div>
+      <div class="dtv-body">
 
-      <!-- Thông tin -->
-      <div class="dtv-section">Thông tin giao dịch</div>
-      <div class="dtv-card">
-        <div class="dtv-info-row">
-          <div class="dtv-info-left">
-            <div class="dtv-info-icon" style="background:rgba(68,138,255,.15)">🗂️</div>
-            <span class="dtv-info-label">Loại giao dịch</span>
+        <!-- Hero -->
+        <div class="dtv-hero">
+          <div class="dtv-icon-wrap">
+            ${typeIcon}
+            <div class="dtv-badge">${badgeArrow}</div>
           </div>
-          <span class="dtv-info-val" style="color:${accentColorHex}">${typeLabel}</span>
+          <div class="dtv-hero-info">
+            <div class="dtv-type">${typeLabel}</div>
+            <div class="dtv-amount">${fmtVND(total)}</div>
+            <div class="dtv-date">📅 ${fmtDate(tx.date)}</div>
+          </div>
+          <div class="dtv-status">✅ Thành công</div>
         </div>
-        <div class="dtv-info-row">
-          <div class="dtv-info-left">
-            <div class="dtv-info-icon" style="background:rgba(38,217,139,.12)">📋</div>
-            <span class="dtv-info-label">Mô tả</span>
-          </div>
-          <span class="dtv-info-val">${tx.description||'—'}</span>
-        </div>
-        ${tx.category ? `
-        <div class="dtv-info-row">
-          <div class="dtv-info-left">
-            <div class="dtv-info-icon" style="background:rgba(38,217,139,.12)">🏷️</div>
-            <span class="dtv-info-label">Danh mục</span>
-          </div>
-          <span class="dtv-info-val">${tx.category}</span>
-        </div>` : ''}
-        <div class="dtv-info-row">
-          <div class="dtv-info-left">
-            <div class="dtv-info-icon" style="background:rgba(249,168,37,.15)">💰</div>
-            <span class="dtv-info-label">Số tiền</span>
-          </div>
-          <span class="dtv-info-val" style="color:${accentColorHex}">${fmtVND(total)}</span>
-        </div>
-        ${contribRows.join('')}
-        ${tx.note ? `
-        <div class="dtv-info-row">
-          <div class="dtv-info-left">
-            <div class="dtv-info-icon" style="background:rgba(68,138,255,.15)">📝</div>
-            <span class="dtv-info-label">Ghi chú</span>
-          </div>
-          <span class="dtv-info-val" style="color:var(--muted);font-style:italic">${tx.note}</span>
-        </div>` : ''}
-      </div>
 
-      <!-- Số dư -->
-      <div class="dtv-section">Số dư sau giao dịch</div>
-      <div class="dtv-card">
-        <div class="dtv-balance-grid">
-          <div class="dtv-bal-item">
-            <div class="dtv-bal-label">💳 Đã nạp</div>
-            <div class="dtv-bal-amt" style="color:var(--green)">${fmtVND(totalNap)}</div>
+        <!-- Thông tin -->
+        <div class="dtv-section">Thông tin giao dịch</div>
+        <div class="dtv-card">
+          <div class="dtv-info-row">
+            <div class="dtv-info-left">
+              <div class="dtv-info-icon" style="background:rgba(68,138,255,.15)">🗂️</div>
+              <span class="dtv-info-label">Loại giao dịch</span>
+            </div>
+            <span class="dtv-info-val" style="color:${accentColorHex}">${typeLabel}</span>
           </div>
-          <div class="dtv-bal-item">
-            <div class="dtv-bal-label">🗂️ Đã chi</div>
-            <div class="dtv-bal-amt" style="color:var(--red)">${fmtVND(totalChi)}</div>
+          <div class="dtv-info-row">
+            <div class="dtv-info-left">
+              <div class="dtv-info-icon" style="background:rgba(38,217,139,.12)">📋</div>
+              <span class="dtv-info-label">Mô tả</span>
+            </div>
+            <span class="dtv-info-val">${tx.description||'—'}</span>
           </div>
-          <div class="dtv-bal-item">
-            <div class="dtv-bal-label">💰 Còn lại</div>
-            <div class="dtv-bal-amt" style="color:var(--yellow)">${fmtVND(conLai)}</div>
-          </div>
-          <div class="dtv-bal-item">
-            <div class="dtv-bal-label">👨 Anh đóng</div>
-            <div class="dtv-bal-amt" style="color:var(--anh)">${fmtVND(anhAmt)}</div>
+          ${tx.category ? `
+          <div class="dtv-info-row">
+            <div class="dtv-info-left">
+              <div class="dtv-info-icon" style="background:rgba(38,217,139,.12)">🏷️</div>
+              <span class="dtv-info-label">Danh mục</span>
+            </div>
+            <span class="dtv-info-val">${tx.category}</span>
+          </div>` : ''}
+          ${contribRows.join('')}
+          ${tx.note ? `
+          <div class="dtv-info-row">
+            <div class="dtv-info-left">
+              <div class="dtv-info-icon" style="background:rgba(68,138,255,.15)">📝</div>
+              <span class="dtv-info-label">Ghi chú</span>
+            </div>
+            <span class="dtv-info-val" style="color:var(--muted);font-style:italic">${tx.note}</span>
+          </div>` : ''}
+        </div>
+
+        <!-- Số dư -->
+        <div class="dtv-section">Số dư sau giao dịch</div>
+        <div class="dtv-card">
+          <div class="dtv-balance-grid">
+            <div class="dtv-bal-item">
+              <div class="dtv-bal-label">💳 Đã nạp</div>
+              <div class="dtv-bal-amt" style="color:var(--green)">${fmtVND(totalNap)}</div>
+            </div>
+            <div class="dtv-bal-item">
+              <div class="dtv-bal-label">🗂️ Đã chi</div>
+              <div class="dtv-bal-amt" style="color:var(--red)">${fmtVND(totalChi)}</div>
+            </div>
+            <div class="dtv-bal-item">
+              <div class="dtv-bal-label">💰 Còn lại</div>
+              <div class="dtv-bal-amt" style="color:var(--yellow)">${fmtVND(conLai)}</div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Actions -->
-      <div style="display:flex;gap:10px;padding-bottom:4px">
-        <button onclick="closeModalById('modal-detail')" style="
-          flex:1;padding:14px;border-radius:12px;border:1.5px solid var(--border2);
-          background:transparent;color:var(--muted);font-size:13px;font-weight:700;
-          cursor:pointer;transition:all .15s;font-family:inherit;
-          display:flex;align-items:center;justify-content:center;gap:6px;
-        " onmouseover="this.style.background='var(--s3)';this.style.color='var(--text)'"
-           onmouseout="this.style.background='transparent';this.style.color='var(--muted)'">
-          ⬇️ Tải biên lai
-        </button>
-        <button onclick="closeModalById('modal-detail');openTxModal('${txId}','${quyKey}')" style="
-          flex:2;padding:14px;border-radius:12px;border:none;
-          background:linear-gradient(135deg,var(--green),#00bfa5);
-          color:#071a14;font-size:13px;font-weight:800;
-          cursor:pointer;transition:opacity .15s;font-family:inherit;
-          display:flex;align-items:center;justify-content:center;gap:6px;
-        " onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
-          ✏️ Chỉnh sửa
-        </button>
+        <!-- Actions -->
+        <div class="dtv-actions">
+          <button class="dtv-btn-outline" onclick="closeModalById('modal-detail')">
+            ⬇️ Tải biên lai
+          </button>
+          <button class="dtv-btn-solid" onclick="closeModalById('modal-detail');openTxModal('${txId}','${quyKey}')">
+            ✏️ Chỉnh sửa
+          </button>
+        </div>
+
       </div>
     </div>`;
 
@@ -1696,12 +1716,12 @@ function openTxDetail(txId, quyKey) {
     m.className = 'modal-overlay';
     m.style.cssText = 'z-index:1100';
     m.innerHTML = `
-      <div class="modal" style="max-width:420px;padding-bottom:4px">
-        <div class="modal-header" style="padding-bottom:12px">
-          <span class="modal-title" style="font-size:15px;font-weight:800;letter-spacing:-.2px">Chi tiết giao dịch</span>
+      <div class="modal" style="max-width:430px;padding:0 0 8px">
+        <div class="modal-header" style="padding:18px 20px 14px;border-bottom:1px solid var(--border)">
+          <span class="modal-title" style="font-size:16px;font-weight:800;letter-spacing:-.3px">Chi tiết giao dịch</span>
           <button class="modal-close" onclick="closeModalById('modal-detail')">✕</button>
         </div>
-        <div id="modal-detail-body"></div>
+        <div id="modal-detail-body" style="padding:16px 16px 8px"></div>
       </div>`;
     document.body.appendChild(m);
   }
