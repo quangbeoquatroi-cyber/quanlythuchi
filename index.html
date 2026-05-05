@@ -2016,120 +2016,116 @@ function toast(msg, type='success') {
 }
 </script>
 
+
+
 <script>
-// ── TỔNG QUAN ──────────────────────────────────────────
-let tqCharts = {};
+var tqCharts = {};
 
 function destroyTqCharts() {
-  Object.values(tqCharts).forEach(ch => { try { ch.destroy(); } catch(e){} });
+  Object.values(tqCharts).forEach(function(ch) { try { ch.destroy(); } catch(e){} });
   tqCharts = {};
 }
 
 function renderTongQuan() {
   destroyTqCharts();
-  const el = document.getElementById('page-tongquan');
-  const year = S.year;
-  const MONTHS = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+  var el = document.getElementById('page-tongquan');
+  var year = S.year;
+  var MONTHS = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
 
   function getOwnerData(owner) {
-    const yearData = (S.bdtCache[owner] || {})[year] || {};
-    const incArr = [], expArr = [];
-    for(let m=1; m<=12; m++) {
-      const d = yearData[m];
+    var yearData = ((S.bdtCache[owner] || {})[year]) || {};
+    var incArr = [], expArr = [];
+    for(var m=1; m<=12; m++) {
+      var d = yearData[m];
       if(d && d.items) {
-        incArr.push(d.items.filter(i=>i.type==='income').reduce((s,i)=>s+(i.amount||0),0));
-        expArr.push(d.items.filter(i=>i.type==='expense').reduce((s,i)=>s+(i.amount||0),0));
+        incArr.push(d.items.filter(function(i){return i.type==='income';}).reduce(function(s,i){return s+(i.amount||0);},0));
+        expArr.push(d.items.filter(function(i){return i.type==='expense';}).reduce(function(s,i){return s+(i.amount||0);},0));
       } else { incArr.push(0); expArr.push(0); }
     }
-    return { incArr, expArr };
+    return { incArr: incArr, expArr: expArr };
   }
 
-  function buildOwnerHTML(owner, label, color) {
-    const {incArr, expArr} = getOwnerData(owner);
-    const totalInc = incArr.reduce((a,b)=>a+b,0);
-    const totalExp = expArr.reduce((a,b)=>a+b,0);
-    return \`
-    <div class="tq-owner-block">
-      <div class="tq-owner-header">
-        <span style="font-size:22px">\${owner==='anh'?'👨':'👩'}</span>
-        <div class="tq-owner-name" style="color:\${color}">\${label}</div>
-        <span style="font-size:12px;color:var(--muted);margin-left:auto">Năm \${year}</span>
-      </div>
-      <div class="tq-chart-row">
-        <div class="tq-chart-box">
-          <div class="tq-chart-label">📈 Tổng Thu Ròng (12 tháng)</div>
-          <div class="tq-chart-canvas-wrap"><canvas id="chart-inc-\${owner}"></canvas></div>
-          <div class="tq-total-row">
-            <span>Tổng cả năm</span>
-            <span class="tq-total-val" style="color:var(--green)">\${fmtVND(totalInc)}</span>
-          </div>
-        </div>
-        <div class="tq-chart-box">
-          <div class="tq-chart-label">📉 Tổng Khoản Chi (12 tháng)</div>
-          <div class="tq-chart-canvas-wrap"><canvas id="chart-exp-\${owner}"></canvas></div>
-          <div class="tq-total-row">
-            <span>Tổng cả năm</span>
-            <span class="tq-total-val" style="color:var(--red)">\${fmtVND(totalExp)}</span>
-          </div>
-        </div>
-      </div>
-    </div>\`;
+  function ownerBlock(owner, label, color) {
+    var d = getOwnerData(owner);
+    var totalInc = d.incArr.reduce(function(a,b){return a+b;},0);
+    var totalExp = d.expArr.reduce(function(a,b){return a+b;},0);
+    var icon = owner==='anh' ? '&#128104;' : '&#128105;';
+    return '<div class="tq-owner-block">' +
+      '<div class="tq-owner-header">' +
+        '<span style="font-size:22px">' + icon + '</span>' +
+        '<div class="tq-owner-name" style="color:' + color + '">' + label + '</div>' +
+        '<span style="font-size:12px;color:var(--muted);margin-left:auto">N\u0103m ' + year + '</span>' +
+      '</div>' +
+      '<div class="tq-chart-row">' +
+        '<div class="tq-chart-box">' +
+          '<div class="tq-chart-label">&#128200; T\u1ed5ng Thu R\u00f2ng (12 th\u00e1ng)</div>' +
+          '<div class="tq-chart-canvas-wrap"><canvas id="chart-inc-' + owner + '"></canvas></div>' +
+          '<div class="tq-total-row">' +
+            '<span>T\u1ed5ng c\u1ea3 n\u0103m</span>' +
+            '<span class="tq-total-val" style="color:var(--green)">' + fmtVND(totalInc) + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="tq-chart-box">' +
+          '<div class="tq-chart-label">&#128201; T\u1ed5ng Kho\u1ea3n Chi (12 th\u00e1ng)</div>' +
+          '<div class="tq-chart-canvas-wrap"><canvas id="chart-exp-' + owner + '"></canvas></div>' +
+          '<div class="tq-total-row">' +
+            '<span>T\u1ed5ng c\u1ea3 n\u0103m</span>' +
+            '<span class="tq-total-val" style="color:var(--red)">' + fmtVND(totalExp) + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
   }
 
-  el.innerHTML = \`<div class="tq-wrap">
-    \${buildOwnerHTML('anh','Của Anh','var(--anh)')}
-    \${buildOwnerHTML('em','Của Em','var(--em)')}
-  </div>\`;
+  el.innerHTML = '<div class="tq-wrap">' +
+    ownerBlock('anh', 'C\u1ee7a Anh', 'var(--anh)') +
+    ownerBlock('em', 'C\u1ee7a Em', 'var(--em)') +
+  '</div>';
 
-  // Draw charts after DOM update
-  requestAnimationFrame(() => {
-    ['anh','em'].forEach(owner => {
-      const {incArr, expArr} = getOwnerData(owner);
-      const MONTHS = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
-      const commonOpts = {
-        responsive:true, maintainAspectRatio:false,
-        plugins:{ legend:{display:false}, tooltip:{
-          callbacks:{ label: ctx => ' ' + fmtVND(ctx.parsed.y) }
-        }},
-        scales:{
-          x:{ grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:'#8a8fa8',font:{size:10}} },
-          y:{ grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:'#8a8fa8',font:{size:10},
-            callback: v => v>=1e6 ? (v/1e6).toFixed(0)+'M' : v>=1e3 ? (v/1e3).toFixed(0)+'K' : v
-          }, beginAtZero:true }
+  function drawCharts() {
+    if(typeof Chart === 'undefined') { setTimeout(drawCharts, 200); return; }
+    var commonOpts = {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: {
+        label: function(ctx) { return ' ' + fmtVND(ctx.parsed.y); }
+      }}},
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#8a8fa8', font: { size: 10 } } },
+        y: { grid: { color: 'rgba(255,255,255,.04)' }, beginAtZero: true,
+          ticks: { color: '#8a8fa8', font: { size: 10 }, callback: function(v) {
+            return v >= 1e6 ? (v/1e6).toFixed(0)+'M' : v >= 1e3 ? (v/1e3).toFixed(0)+'K' : v;
+          }}
         }
-      };
-      // Income chart
-      const incCtx = document.getElementById('chart-inc-'+owner);
-      if(incCtx) {
-        tqCharts['inc-'+owner] = new Chart(incCtx, {
-          type:'bar',
-          data:{ labels:MONTHS, datasets:[{
-            data: incArr,
-            backgroundColor: owner==='anh' ? 'rgba(249,168,37,.55)' : 'rgba(236,64,122,.45)',
-            borderColor: owner==='anh' ? '#f9a825' : '#ec407a',
-            borderWidth:2, borderRadius:5,
-          }]},
+      }
+    };
+    ['anh','em'].forEach(function(owner) {
+      var d = getOwnerData(owner);
+      var incClr = owner==='anh' ? 'rgba(249,168,37,.6)' : 'rgba(236,64,122,.5)';
+      var incBdr = owner==='anh' ? '#f9a825' : '#ec407a';
+      var incEl = document.getElementById('chart-inc-'+owner);
+      if(incEl) {
+        tqCharts['inc-'+owner] = new Chart(incEl, {
+          type: 'bar',
+          data: { labels: MONTHS, datasets: [{ data: d.incArr,
+            backgroundColor: incClr, borderColor: incBdr,
+            borderWidth: 2, borderRadius: 5 }] },
           options: commonOpts
         });
       }
-      // Expense chart
-      const expCtx = document.getElementById('chart-exp-'+owner);
-      if(expCtx) {
-        tqCharts['exp-'+owner] = new Chart(expCtx, {
-          type:'bar',
-          data:{ labels:MONTHS, datasets:[{
-            data: expArr,
-            backgroundColor: 'rgba(255,82,82,.35)',
-            borderColor: '#ff5252',
-            borderWidth:2, borderRadius:5,
-          }]},
+      var expEl = document.getElementById('chart-exp-'+owner);
+      if(expEl) {
+        tqCharts['exp-'+owner] = new Chart(expEl, {
+          type: 'bar',
+          data: { labels: MONTHS, datasets: [{ data: d.expArr,
+            backgroundColor: 'rgba(255,82,82,.4)', borderColor: '#ff5252',
+            borderWidth: 2, borderRadius: 5 }] },
           options: commonOpts
         });
       }
     });
-  });
+  }
+  drawCharts();
 }
 </script>
-
 </body>
 </html>
