@@ -1000,7 +1000,7 @@ const fmtVNDSign = n => {
 const fmtDate = d => {
   if(!d) return '';
   const dd = new Date(d);
-  return dd.toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit'});
+  return dd.toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric'});
 };
 const today = () => new Date().toISOString().slice(0,10);
 const BDT_PAGES = ['anh','em'];
