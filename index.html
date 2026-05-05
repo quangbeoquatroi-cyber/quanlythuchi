@@ -602,34 +602,60 @@ a{text-decoration:none;color:inherit}
 
   /* Quy page */
   .quy-header{padding:14px 16px}
+  .quy-header-top{flex-wrap:wrap;gap:8px}
   .quy-name{font-size:16px}
   .quy-icon-big{font-size:24px}
+  .quy-header-btns{flex-wrap:wrap;gap:6px}
+  .progress-label{font-size:11px}
   .quy-stats{grid-template-columns:repeat(2,1fr);gap:8px}
   .stat-card{padding:10px 12px}
   .stat-card-value{font-size:15px}
 
-  /* Transaction table – horizontal scroll on mobile */
-  .tx-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  .tx-table-header{
-    display:flex;padding:8px 12px;
-    font-size:10px;
-    min-width:560px;
-  }
+  /* Transaction table – card layout on mobile */
+  .tx-table-wrap{overflow:visible}
+  .tx-table-header{display:none}
   .tx-row{
-    flex-wrap:nowrap;padding:9px 12px;gap:0;
-    align-items:center;
-    min-width:560px;
+    display:grid;
+    grid-template-areas:
+      "desc desc actions"
+      "anh  em   actions";
+    grid-template-columns:1fr 1fr 52px;
+    grid-template-rows:auto auto;
+    padding:10px 12px;gap:1px 8px;
+    align-items:start;
   }
-  .tx-col-date{width:60px;flex-shrink:0;font-size:11px}
-  .tx-col-desc{flex:1;min-width:0;font-size:12px;padding:0 6px;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .tx-col-anh{width:90px;flex-shrink:0;font-size:12px;text-align:right}
-  .tx-col-em{width:90px;flex-shrink:0;font-size:12px;text-align:right}
-  .tx-col-cat{width:70px;flex-shrink:0;padding:0 4px;display:flex!important}
-  .tx-col-cat .cat-badge{font-size:9px;padding:2px 5px;white-space:nowrap}
-  .tx-col-actions{width:50px;flex-shrink:0;display:flex;gap:2px;justify-content:flex-end}
-  .tx-act-btn{width:22px;height:22px;font-size:12px}
-  .tx-row.total-row .tx-col-desc{font-size:12px}
+  .tx-col-date{display:none}
+  .tx-col-desc{
+    grid-area:desc;font-size:13px;font-weight:600;
+    padding:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .tx-col-anh{
+    grid-area:anh;width:auto;font-size:12px;
+    text-align:left;padding:0;font-weight:700;
+  }
+  .tx-col-em{
+    grid-area:em;width:auto;font-size:12px;
+    text-align:left;padding:0;font-weight:700;
+  }
+  .tx-col-cat{display:none}
+  .tx-col-actions{
+    grid-area:actions;width:auto;
+    display:flex;flex-direction:column;gap:3px;
+    align-items:flex-end;justify-content:center;
+    grid-row:1/3;
+  }
+  .tx-act-btn{width:26px;height:26px;font-size:13px}
+  .tx-col-anh::before{content:'👨 ';font-size:10px;opacity:.7}
+  .tx-col-em::before{content:'👩 ';font-size:10px;opacity:.7}
+  .tx-row.total-row{
+    display:flex;flex-wrap:wrap;gap:4px;
+  }
+  .tx-row.total-row .tx-col-desc{flex:1 0 100%;font-size:13px;font-weight:800}
+  .tx-row.total-row .tx-col-anh,
+  .tx-row.total-row .tx-col-em{width:auto}
+  .tx-row.total-row .tx-col-anh::before,
+  .tx-row.total-row .tx-col-em::before{content:''}
+  .tx-row.total-row .tx-col-actions{display:none}
 
   /* Modals */
   .modal-overlay{padding:0;align-items:flex-end}
