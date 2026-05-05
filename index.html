@@ -391,6 +391,7 @@ a{text-decoration:none;color:inherit}
 }
 .tx-badge-in{background:rgba(72,199,142,.15);color:var(--green);}
 .tx-badge-out{background:rgba(255,82,82,.12);color:var(--red);}
+.tx-badge-cat{background:rgba(255,214,0,.12);color:#f5c842;letter-spacing:.04em;}
 .tx-card-amt{
   font-size:14px;font-weight:800;
   font-family:'Courier New',monospace;
@@ -933,7 +934,13 @@ select.field-input option{background:var(--s2)}
       <div class="field-row">
         <div class="field-group">
           <label class="field-label">Danh mục</label>
-          <input type="text" class="field-input" id="tx-cat" placeholder="Ví dụ: Ăn uống">
+          <select class="field-input" id="tx-cat">
+            <option value="">-- Trống --</option>
+            <option value="Ăn uống">🍜 Ăn uống</option>
+            <option value="Nghỉ ngơi/Booking">🏨 Nghỉ ngơi/Booking</option>
+            <option value="Tiền dư quỹ">💰 Tiền dư quỹ</option>
+            <option value="Khác">📌 Khác</option>
+          </select>
         </div>
         <div class="field-group">
           <label class="field-label">Ghi chú</label>
@@ -1362,7 +1369,7 @@ function renderQuy(key) {
           <div class="tx-card-body">
             <div class="tx-card-title">${t.description||'—'}</div>
             ${t.note?`<div class="tx-card-note">${t.note}</div>`:''}
-            <span class="tx-card-badge ${isIn?'tx-badge-in':'tx-badge-out'}">${isIn?'+ Nạp':'− Chi'}</span>
+            ${(t.category||'') ? `<span class="tx-card-badge tx-badge-cat">${t.category}</span>` : `<span class="tx-card-badge ${isIn?'tx-badge-in':'tx-badge-out'}">${isIn?'+ Nạp':'− Chi'}</span>`}
           </div>
           <div class="tx-card-amt ${isIn?'tx-type-in':'tx-type-out'}">${totalAmt?fmtVND(totalAmt):'—'}</div>
           <div class="tx-card-actions">
@@ -1537,7 +1544,7 @@ function openTxDetail(txId, quyKey) {
     contribRows.push(`
     <div class="dtv-info-row">
       <div class="dtv-info-left">
-        <div class="dtv-info-icon" style="background:rgba(249,168,37,.15)">${isIn ? '👩' : '💗'}</div>
+        <div class="dtv-info-icon" style="background:rgba(249,168,37,.15)">${isIn ? '🥰' : '💗'}</div>
         <span class="dtv-info-label">${emLabel}</span>
       </div>
       <span class="dtv-info-val" style="color:var(--em)">${fmtVND(emAmt)}</span>
@@ -1800,7 +1807,7 @@ function updateTxTypeUI() {
   if(type === 'out') {
     anhGroup.style.display = 'none';
     document.getElementById('tx-anh').value = 0;
-    emLabel.textContent = '👩 Em thanh toán (₫)';
+    emLabel.textContent = '💗 Em thanh toán (₫)';
   } else {
     anhGroup.style.display = '';
     emLabel.textContent = '💗 Em đóng (₫)';
@@ -1821,7 +1828,7 @@ function openTxModal(txId, quyKey) {
       document.getElementById('tx-desc').value = tx.description || '';
       document.getElementById('tx-anh').value  = tx.amount_anh ? Number(tx.amount_anh).toLocaleString('vi-VN') : '';
       document.getElementById('tx-em').value   = tx.amount_em  ? Number(tx.amount_em).toLocaleString('vi-VN')  : '';
-      document.getElementById('tx-cat').value  = tx.category || '';
+      const catSel = document.getElementById('tx-cat'); catSel.value = tx.category || ''; if(![...catSel.options].map(o=>o.value).includes(catSel.value)) catSel.value = '';
       document.getElementById('tx-note').value = tx.note || '';
     }
   } else {
