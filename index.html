@@ -355,10 +355,10 @@ a{text-decoration:none;color:inherit}
 }
 .tx-col-date{width:90px;flex-shrink:0;color:var(--muted)}
 .tx-col-desc{flex:1;font-weight:600;padding:0 8px}
-.tx-col-anh{width:110px;flex-shrink:0;text-align:right;color:var(--anh);font-weight:700}
-.tx-col-em{width:110px;flex-shrink:0;text-align:right;color:var(--em);font-weight:700}
-.tx-col-cat{width:100px;flex-shrink:0;padding:0 8px}
-.tx-col-actions{width:60px;flex-shrink:0;display:flex;gap:6px;justify-content:flex-end}
+.tx-col-anh{width:130px;flex-shrink:0;text-align:right;font-weight:700}
+.tx-col-em{display:none}
+.tx-col-cat{display:none}
+.tx-col-actions{width:90px;flex-shrink:0;display:flex;gap:6px;justify-content:flex-end}
 .tx-act-btn{
   background:transparent;border:none;
   width:26px;height:26px;border-radius:6px;
@@ -615,14 +615,14 @@ a{text-decoration:none;color:inherit}
   }
   .tx-col-date{width:auto;font-size:11px;color:var(--muted)}
   .tx-col-desc{flex:1;min-width:0;font-size:13px;padding:0}
-  .tx-col-anh,.tx-col-em{width:auto;font-size:12px;text-align:left}
-  .tx-col-cat,.tx-col-date{display:none}
+  .tx-col-anh{width:auto;font-size:12px;text-align:right}
+  .tx-col-em{display:none}
+  .tx-col-cat{display:none}
   .tx-col-actions{
     flex-shrink:0;
     width:auto;
     display:flex;gap:4px;
   }
-  .tx-row.total-row .tx-col-desc{font-size:13px}
 
   /* Modals */
   .modal-overlay{padding:0;align-items:flex-end}
@@ -1312,6 +1312,7 @@ function renderQuy(key) {
     const isIn   = t.type === 'in';
     const anhAmt = t.amount_anh||0;
     const emAmt  = t.amount_em||0;
+    const totalAmt = anhAmt + emAmt;
     return `
     <div class="tx-row">
       <div class="tx-col-date">${fmtDate(t.date)}</div>
@@ -1320,20 +1321,14 @@ function renderQuy(key) {
         ${t.description||'—'}
         ${t.note?`<span style="color:var(--muted);font-size:12px;margin-left:6px">(${t.note})</span>`:''}
       </div>
-      <div class="tx-col-anh ${isIn?'tx-type-in':'tx-type-out'}">${anhAmt?fmtVND(anhAmt):'—'}</div>
-      <div class="tx-col-em ${isIn?'tx-type-in':'tx-type-out'}">${emAmt?fmtVND(emAmt):'—'}</div>
-      <div class="tx-col-cat"><span class="cat-badge">${t.category||'Khác'}</span></div>
+      <div class="tx-col-anh ${isIn?'tx-type-in':'tx-type-out'}">${totalAmt?fmtVND(totalAmt):'—'}</div>
       <div class="tx-col-actions">
+        <button class="tx-act-btn" onclick="openTxDetail('${t.id}','${key}')" title="Xem chi tiết">🔍</button>
         <button class="tx-act-btn" onclick="openTxModal('${t.id}','${key}')" title="Sửa">✏️</button>
         <button class="tx-act-btn del" onclick="confirmDeleteTx('${t.id}','${key}')" title="Xóa">🗑</button>
       </div>
     </div>`;
   }).join('');
-
-  const totalAnhIn  = txs.filter(t=>t.type==='in').reduce((s,t)=>s+(t.amount_anh||0),0);
-  const totalEmIn   = txs.filter(t=>t.type==='in').reduce((s,t)=>s+(t.amount_em||0),0);
-  const totalAnhOut = txs.filter(t=>t.type==='out').reduce((s,t)=>s+(t.amount_anh||0),0);
-  const totalEmOut  = txs.filter(t=>t.type==='out').reduce((s,t)=>s+(t.amount_em||0),0);
 
   el.innerHTML = `
   <div class="quy-header">
@@ -1371,21 +1366,10 @@ function renderQuy(key) {
     <div class="tx-table-header">
       <div class="tx-col-date">Ngày</div>
       <div class="tx-col-desc">Mô tả</div>
-      <div class="tx-col-anh">Anh</div>
-      <div class="tx-col-em">Em</div>
-      <div class="tx-col-cat">Danh mục</div>
+      <div class="tx-col-anh">Tiền</div>
       <div class="tx-col-actions"></div>
     </div>
     ${txRows || `<div style="padding:32px;text-align:center;color:var(--muted);font-size:13px">Chưa có giao dịch nào</div>`}
-    ${txs.length?`
-    <div class="tx-row total-row">
-      <div class="tx-col-date"></div>
-      <div class="tx-col-desc">TỔNG</div>
-      <div class="tx-col-anh" style="color:var(--anh)">${fmtVND(totalAnhIn - totalAnhOut)}</div>
-      <div class="tx-col-em" style="color:var(--em)">${fmtVND(totalEmIn - totalEmOut)}</div>
-      <div class="tx-col-cat"></div>
-      <div class="tx-col-actions"></div>
-    </div>`:''}
   </div>`;
 }
 
@@ -1475,6 +1459,42 @@ async function saveMonth() {
 }
 
 // ── TX MODAL ─────────────────────────────────────────────
+function openTxDetail(txId, quyKey) {
+  const q  = S.quyCache[quyKey];
+  const tx = (q?.transactions||[]).find(t => t.id === txId);
+  if(!tx) return;
+  const isIn = tx.type === 'in';
+  const anhAmt = tx.amount_anh || 0;
+  const emAmt  = tx.amount_em  || 0;
+  const total  = anhAmt + emAmt;
+  const detail = `
+    <div style="background:var(--card);border-radius:14px;padding:20px;line-height:2;font-size:14px">
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Ngày</span><strong>${fmtDate(tx.date)}</strong></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Loại</span><strong>${isIn?'📥 Nạp tiền':'📤 Chi tiền'}</strong></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Mô tả</span><strong>${tx.description||'—'}</strong></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Tổng tiền</span><strong style="color:${isIn?'var(--green)':'var(--red)'}">${fmtVND(total)}</strong></div>
+      ${anhAmt?`<div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">👨 Anh đóng</span><span style="color:var(--anh)">${fmtVND(anhAmt)}</span></div>`:''}
+      ${emAmt?`<div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">👩 Em đóng</span><span style="color:var(--em)">${fmtVND(emAmt)}</span></div>`:''}
+      ${tx.category?`<div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Danh mục</span><span class="cat-badge">${tx.category}</span></div>`:''}
+      ${tx.note?`<div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Ghi chú</span><em>${tx.note}</em></div>`:''}
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn-outline" style="flex:1" onclick="closeModalById('modal-detail')">Đóng</button>
+      <button class="btn-primary" style="flex:1" onclick="closeModalById('modal-detail');openTxModal('${txId}','${quyKey}')">✏️ Sửa</button>
+    </div>`;
+  // reuse a simple modal
+  let m = document.getElementById('modal-detail');
+  if(!m){
+    m = document.createElement('div');
+    m.id = 'modal-detail';
+    m.className = 'modal-overlay';
+    m.innerHTML = '<div class="modal" style="max-width:400px"><div class="modal-header"><span class="modal-title">Chi tiết giao dịch</span><button class="modal-close" onclick="closeModalById(\'modal-detail\')">✕</button></div><div id="modal-detail-body"></div></div>';
+    document.body.appendChild(m);
+  }
+  document.getElementById('modal-detail-body').innerHTML = detail;
+  openModalById('modal-detail');
+}
+
 function openTxModal(txId, quyKey) {
   S.editTxId    = txId || null;
   S.editTxQuyId = quyKey;
