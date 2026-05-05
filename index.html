@@ -554,30 +554,32 @@ a{text-decoration:none;color:inherit}
 .toast-dismiss:hover{color:var(--text)}
 
 /* ── TỔNG QUAN ─────────────────────────────────────────── */
-.tq-wrap{padding:12px;max-width:600px;margin:0 auto}
-.tq-section-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px;padding:0 2px}
-.tq-summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
-.tq-sum-card{background:var(--s2);border-radius:14px;padding:14px 12px;border:1px solid var(--border)}
-.tq-anh{border-left:3px solid var(--anh)}
-.tq-em{border-left:3px solid var(--em)}
-.tq-sum-person{font-size:13px;font-weight:700;margin-bottom:10px;color:var(--text)}
-.tq-sum-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;gap:4px}
-.tq-sum-net{border-top:1px solid var(--border);margin-top:6px;padding-top:6px}
-.tq-label{font-size:11px;color:var(--muted);white-space:nowrap}
-.tq-val{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;text-align:right;word-break:break-all}
-.tq-val.income{color:var(--green)}
-.tq-val.income-em{color:var(--em)}
-.tq-val.expense{color:var(--red)}
-.tq-chart-card{background:var(--s2);border-radius:14px;padding:14px 10px 10px;border:1px solid var(--border);overflow:hidden}
-.tq-chart-legend{display:flex;gap:14px;justify-content:center;margin-top:8px;flex-wrap:wrap}
-.tq-leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
-.tq-leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
-.tq-empty{text-align:center;padding:32px 20px;color:var(--muted);font-size:13px;background:var(--s2);border-radius:14px;margin-top:16px}
-@media(max-width:480px){
-  .tq-summary-grid{grid-template-columns:1fr}
-  .tq-val{font-size:10px}
+.tq-page{padding:0 0 32px}
+.tq-page-header{padding:16px 16px 12px}
+.tq-page-title{font-size:17px;font-weight:800;color:var(--text);margin-bottom:3px}
+.tq-page-sub{font-size:12px;color:var(--muted)}
+.tq-cards-area{display:flex;flex-direction:column;gap:14px;padding:0 12px}
+.tq-card{background:var(--s2);border-radius:16px;border:1px solid var(--border);overflow:hidden}
+.tq-card-anh{border-top:3px solid var(--anh)}
+.tq-card-em{border-top:3px solid var(--em)}
+.tq-card-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 6px}
+.tq-card-person{font-size:14px;font-weight:700}
+.tq-card-year{font-size:11px;color:var(--muted)}
+.tq-card-body{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
+.tq-stat-block{background:var(--s2);padding:12px 14px}
+.tq-stat-label{font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:500}
+.tq-stat-value{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.2;word-break:break-all}
+.tq-card-footer{display:flex;border-top:1px solid var(--border)}
+.tq-footer-col{flex:1;display:flex;align-items:center;gap:10px;padding:11px 13px;border-right:1px solid var(--border)}
+.tq-footer-col:last-child{border-right:none}
+.tq-footer-icon{font-size:20px;flex-shrink:0}
+.tq-footer-label{font-size:10px;color:var(--muted);margin-bottom:2px}
+.tq-footer-val{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+@media(max-width:400px){
+  .tq-stat-value{font-size:13px}
+  .tq-footer-val{font-size:11px}
+  .tq-footer-col{padding:9px 10px;gap:7px}
 }
-
 
 /* ── EMPTY STATE ────────────────────────────────────────── */
 .empty-state{
@@ -1258,7 +1260,7 @@ async function deleteQuyTx(txId) {
 // ── RENDER PAGES ─────────────────────────────────────────
 function renderPage(page) {
   if(page==='tongquan') {
-    // Ensure both owners' data is loaded for the current year
+    // Ensure both owners' data is loaded for the current year AND prev year (for % change)
     Promise.all([loadBDTYear('anh',S.year), loadBDTYear('em',S.year)]).then(() => renderTongQuan());
   } else if(BDT_PAGES.includes(page)) renderBDT(page);
   else renderQuy(page);
@@ -1269,225 +1271,77 @@ function renderTongQuan() {
   const el = document.getElementById('page-tongquan');
   const year = S.year;
 
-  // Gather monthly data for both owners
-  function getMonthlyData(owner) {
+  function getYearTotals(owner) {
     const yearData = S.bdtCache[owner][year] || {};
-    const months = [1,2,3,4,5,6,7,8,9,10,11,12];
-    return months.map(m => {
-      const d = yearData[m];
-      if(!d) return { month: m, income: 0, expense: 0 };
-      const income  = d.items.filter(i=>i.type==='income').reduce((s,i)=>s+(i.amount||0),0);
-      const expense = d.items.filter(i=>i.type==='expense').reduce((s,i)=>s+(i.amount||0),0);
-      return { month: m, income, expense };
+    let income = 0, expense = 0;
+    Object.values(yearData).forEach(d => {
+      if(!d || !d.items) return;
+      d.items.forEach(i => {
+        if(i.type === 'income')  income  += (i.amount || 0);
+        if(i.type === 'expense') expense += (i.amount || 0);
+      });
     });
+    return { income, expense };
   }
 
-  const anhData = getMonthlyData('anh');
-  const emData  = getMonthlyData('em');
+  const anhCur = getYearTotals('anh');
+  const emCur  = getYearTotals('em');
+  const fmt = n => n ? n.toLocaleString('vi-VN') + ' ₫' : '0 ₫';
 
-  // Compute totals
-  const anhTotalIncome  = anhData.reduce((s,d)=>s+d.income, 0);
-  const anhTotalExpense = anhData.reduce((s,d)=>s+d.expense, 0);
-  const emTotalIncome   = emData.reduce((s,d)=>s+d.income, 0);
-  const emTotalExpense  = emData.reduce((s,d)=>s+d.expense, 0);
+  function renderPersonCard(owner, cur) {
+    const isAnh = owner === 'anh';
+    const color     = isAnh ? 'var(--anh)' : 'var(--em)';
+    const cardCls   = isAnh ? 'tq-card-anh' : 'tq-card-em';
+    const personLabel = isAnh ? '👨 Của Anh' : '👩 Của Em';
+    const net = cur.income - cur.expense;
 
-  const hasData = anhTotalIncome > 0 || emTotalIncome > 0;
+    return `
+<div class="tq-card ${cardCls}">
+  <div class="tq-card-header">
+    <span class="tq-card-person" style="color:${color}">${personLabel}</span>
+    <span class="tq-card-year">Năm ${year}</span>
+  </div>
 
-  // Donut SVG generator
-  function donutSvg(pct, color, size=64) {
-    const r = 22, cx = size/2, cy = size/2;
-    const circ = 2 * Math.PI * r;
-    const dashArr = `${pct/100*circ} ${circ}`;
-    return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="8"/>
-      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="8"
-        stroke-dasharray="${dashArr}" stroke-dashoffset="${circ/4}" stroke-linecap="round"/>
-      <text x="${cx}" y="${cy+1}" text-anchor="middle" dominant-baseline="middle"
-        fill="${color}" font-size="11" font-weight="700">${pct}%</text>
-    </svg>`;
+  <div class="tq-card-body">
+    <div class="tq-stat-block tq-stat-inc">
+      <div class="tq-stat-label">📈 Tổng Thu Ròng (12 tháng)</div>
+      <div class="tq-stat-value" style="color:#26d98b">${fmt(cur.income)}</div>
+    </div>
+    <div class="tq-stat-block tq-stat-exp">
+      <div class="tq-stat-label">📉 Tổng Khoản Chi (12 tháng)</div>
+      <div class="tq-stat-value" style="color:#ff5252">${fmt(cur.expense)}</div>
+    </div>
+  </div>
+
+  <div class="tq-card-footer">
+    <div class="tq-footer-col">
+      <span class="tq-footer-icon">💚</span>
+      <div>
+        <div class="tq-footer-label">Tổng thu ròng</div>
+        <div class="tq-footer-val" style="color:#26d98b">${fmt(cur.income)}</div>
+      </div>
+    </div>
+    <div class="tq-footer-col">
+      <span class="tq-footer-icon">🔴</span>
+      <div>
+        <div class="tq-footer-label">Tổng khoản chi</div>
+        <div class="tq-footer-val" style="color:#ff5252">${fmt(cur.expense)}</div>
+      </div>
+    </div>
+  </div>
+</div>`;
   }
-
-  // Bar chart SVG for a person
-  function barChartSvg(data, incomeColor, expenseColor, title) {
-    const W = 320, H = 180, PAD = { top:28, right:12, bottom:36, left:52 };
-    const chartW = W - PAD.left - PAD.right;
-    const chartH = H - PAD.top - PAD.bottom;
-    const maxVal = Math.max(...data.map(d => Math.max(d.income, d.expense)), 1);
-    const barW = chartW / 12 * 0.35;
-    const gap  = chartW / 12 * 0.1;
-    const slotW = chartW / 12;
-    const months = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
-
-    // Y grid lines
-    const gridLines = [0.25, 0.5, 0.75, 1].map(f => {
-      const y = PAD.top + chartH * (1-f);
-      const val = maxVal * f;
-      const label = val >= 1e9 ? (val/1e9).toFixed(1)+'T' : val >= 1e6 ? (val/1e6).toFixed(0)+'M' : (val/1e3).toFixed(0)+'K';
-      return `<line x1="${PAD.left}" y1="${y}" x2="${W-PAD.right}" y2="${y}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
-<text x="${PAD.left-4}" y="${y}" text-anchor="end" dominant-baseline="middle" fill="rgba(255,255,255,0.35)" font-size="7">${label}</text>`;
-    }).join('');
-
-    const bars = data.map((d,i) => {
-      const x = PAD.left + slotW * i;
-      const ih = d.income  ? chartH * (d.income  / maxVal) : 0;
-      const eh = d.expense ? chartH * (d.expense / maxVal) : 0;
-      const ix = x + slotW/2 - barW - gap/2;
-      const ex = x + slotW/2 + gap/2;
-      const iy = PAD.top + chartH - ih;
-      const ey = PAD.top + chartH - eh;
-      const mx = x + slotW/2;
-      const my = H - PAD.bottom + 12;
-      return `
-  <rect x="${ix.toFixed(1)}" y="${iy.toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(ih,1).toFixed(1)}" fill="${incomeColor}" rx="2" opacity="${d.income?1:0.15}"/>
-  <rect x="${ex.toFixed(1)}" y="${ey.toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(eh,1).toFixed(1)}" fill="${expenseColor}" rx="2" opacity="${d.expense?1:0.15}"/>
-  <text x="${mx.toFixed(1)}" y="${my}" text-anchor="middle" fill="rgba(255,255,255,0.45)" font-size="7">${months[i]}</text>`;
-    }).join('');
-
-    return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px;display:block">
-  <text x="${W/2}" y="14" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="10" font-weight="600">${title}</text>
-  ${gridLines}
-  <line x1="${PAD.left}" y1="${PAD.top}" x2="${PAD.left}" y2="${PAD.top+chartH}" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
-  <line x1="${PAD.left}" y1="${PAD.top+chartH}" x2="${W-PAD.right}" y2="${PAD.top+chartH}" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
-  ${bars}
-</svg>`;
-  }
-
-  // Combined bars chart (Anh income + expense vs Em income + expense)
-  function combinedChartSvg(anhData, emData) {
-    const W = 340, H = 200, PAD = { top:32, right:12, bottom:40, left:52 };
-    const chartW = W - PAD.left - PAD.right;
-    const chartH = H - PAD.top - PAD.bottom;
-    const maxVal = Math.max(...anhData.map(d=>Math.max(d.income,d.expense)), ...emData.map(d=>Math.max(d.income,d.expense)), 1);
-    const slotW  = chartW / 12;
-    const barW   = slotW * 0.2;
-    const months = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
-
-    const gridLines = [0.25, 0.5, 0.75, 1].map(f => {
-      const y = PAD.top + chartH * (1-f);
-      const val = maxVal * f;
-      const label = val >= 1e9 ? (val/1e9).toFixed(1)+'T' : val >= 1e6 ? (val/1e6).toFixed(0)+'M' : (val/1e3).toFixed(0)+'K';
-      return `<line x1="${PAD.left}" y1="${y}" x2="${W-PAD.right}" y2="${y}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
-<text x="${PAD.left-4}" y="${y}" text-anchor="middle" dominant-baseline="middle" fill="rgba(255,255,255,0.35)" font-size="7">${label}</text>`;
-    }).join('');
-
-    const bars = anhData.map((anh,i) => {
-      const em = emData[i];
-      const x  = PAD.left + slotW * i;
-      const cx = x + slotW/2;
-      const sp = 1;
-      const anhIH = anh.income  ? chartH*(anh.income /maxVal) : 0;
-      const anhEH = anh.expense ? chartH*(anh.expense/maxVal) : 0;
-      const emIH  = em.income   ? chartH*(em.income  /maxVal) : 0;
-      const emEH  = em.expense  ? chartH*(em.expense /maxVal) : 0;
-      const b0 = cx - barW*2 - sp*1.5;
-      const b1 = cx - barW   - sp*0.5;
-      const b2 = cx          + sp*0.5;
-      const b3 = cx + barW   + sp*1.5;
-      const base = PAD.top + chartH;
-      const mx = cx, my = H - PAD.bottom + 13;
-      return `
-  <rect x="${b0.toFixed(1)}" y="${(base-Math.max(anhIH,1)).toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(anhIH,1).toFixed(1)}" fill="#4ade80" rx="1.5" opacity="${anh.income?0.9:0.12}"/>
-  <rect x="${b1.toFixed(1)}" y="${(base-Math.max(anhEH,1)).toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(anhEH,1).toFixed(1)}" fill="#f97316" rx="1.5" opacity="${anh.expense?0.9:0.12}"/>
-  <rect x="${b2.toFixed(1)}" y="${(base-Math.max(emIH,1)).toFixed(1)}"  width="${barW.toFixed(1)}" height="${Math.max(emIH,1).toFixed(1)}"  fill="#ec4899" rx="1.5" opacity="${em.income?0.9:0.12}"/>
-  <rect x="${b3.toFixed(1)}" y="${(base-Math.max(emEH,1)).toFixed(1)}"  width="${barW.toFixed(1)}" height="${Math.max(emEH,1).toFixed(1)}"  fill="#ef4444" rx="1.5" opacity="${em.expense?0.9:0.12}"/>
-  <text x="${mx.toFixed(1)}" y="${my}" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="7">${months[i]}</text>`;
-    }).join('');
-
-    const legendY = PAD.top - 14;
-    const legendItems = [
-      {color:'#4ade80', label:'Anh Thu'},
-      {color:'#f97316', label:'Anh Chi'},
-      {color:'#ec4899', label:'Em Thu'},
-      {color:'#ef4444', label:'Em Chi'},
-    ];
-    const legendW = W / 4;
-    const legend = legendItems.map((l,i) => `
-  <rect x="${(i*legendW + 4).toFixed(0)}" y="${legendY-4}" width="7" height="7" fill="${l.color}" rx="1.5"/>
-  <text x="${(i*legendW + 14).toFixed(0)}" y="${legendY+2}" fill="rgba(255,255,255,0.55)" font-size="7.5">${l.label}</text>`).join('');
-
-    return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px;display:block">
-  ${legend}
-  ${gridLines}
-  <line x1="${PAD.left}" y1="${PAD.top}" x2="${PAD.left}" y2="${PAD.top+chartH}" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
-  <line x1="${PAD.left}" y1="${PAD.top+chartH}" x2="${W-PAD.right}" y2="${PAD.top+chartH}" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
-  ${bars}
-</svg>`;
-  }
-
-  const fmt = n => n ? n.toLocaleString('vi-VN')+'₫' : '0₫';
-  const anhIncPct = anhTotalIncome > 0 ? Math.round(anhTotalIncome/(anhTotalIncome+emTotalIncome)*100)||0 : 0;
-  const emIncPct  = 100 - anhIncPct;
-  const anhExpPct = anhTotalExpense > 0 ? Math.round(anhTotalExpense/(anhTotalExpense+emTotalExpense)*100)||0 : 0;
-  const emExpPct  = 100 - anhExpPct;
 
   el.innerHTML = `
-<div class="tq-wrap">
-
-  <!-- Year Summary Cards -->
-  <div class="tq-section-title">📅 Tóm Tắt Năm ${year}</div>
-  <div class="tq-summary-grid">
-    <div class="tq-sum-card tq-anh">
-      <div class="tq-sum-person">👨 Của Anh</div>
-      <div class="tq-sum-row">
-        <span class="tq-label">Thu ròng</span>
-        <span class="tq-val income">${fmt(anhTotalIncome)}</span>
-      </div>
-      <div class="tq-sum-row">
-        <span class="tq-label">Khoản chi</span>
-        <span class="tq-val expense">${fmt(anhTotalExpense)}</span>
-      </div>
-      <div class="tq-sum-row tq-sum-net">
-        <span class="tq-label">Còn lại</span>
-        <span class="tq-val" style="color:${anhTotalIncome-anhTotalExpense>=0?'var(--green)':'var(--red)'}">
-          ${(anhTotalIncome-anhTotalExpense>=0?'+':'')+fmt(anhTotalIncome-anhTotalExpense)}
-        </span>
-      </div>
-    </div>
-    <div class="tq-sum-card tq-em">
-      <div class="tq-sum-person">👩 Của Em</div>
-      <div class="tq-sum-row">
-        <span class="tq-label">Thu ròng</span>
-        <span class="tq-val income-em">${fmt(emTotalIncome)}</span>
-      </div>
-      <div class="tq-sum-row">
-        <span class="tq-label">Khoản chi</span>
-        <span class="tq-val expense">${fmt(emTotalExpense)}</span>
-      </div>
-      <div class="tq-sum-row tq-sum-net">
-        <span class="tq-label">Còn lại</span>
-        <span class="tq-val" style="color:${emTotalIncome-emTotalExpense>=0?'var(--green)':'var(--red)'}">
-          ${(emTotalIncome-emTotalExpense>=0?'+':'')+fmt(emTotalIncome-emTotalExpense)}
-        </span>
-      </div>
-    </div>
+<div class="tq-page">
+  <div class="tq-page-header">
+    <div class="tq-page-title">Tổng quan tài chính</div>
+    <div class="tq-page-sub">Theo dõi tổng thu chi của bạn và người ấy trong 12 tháng</div>
   </div>
-
-  <!-- Combined Chart -->
-  <div class="tq-section-title">📊 Biểu Đồ So Sánh 12 Tháng</div>
-  <div class="tq-chart-card">
-    ${combinedChartSvg(anhData, emData)}
+  <div class="tq-cards-area">
+    ${renderPersonCard('anh', anhCur)}
+    ${renderPersonCard('em',  emCur)}
   </div>
-
-  <!-- Individual Charts -->
-  <div class="tq-section-title">👨 Của Anh — Thu & Chi 12 Tháng</div>
-  <div class="tq-chart-card">
-    ${barChartSvg(anhData, '#4ade80', '#f97316', '')}
-    <div class="tq-chart-legend">
-      <span class="tq-leg-item"><span class="tq-leg-dot" style="background:#4ade80"></span>Thu Ròng</span>
-      <span class="tq-leg-item"><span class="tq-leg-dot" style="background:#f97316"></span>Khoản Chi</span>
-    </div>
-  </div>
-
-  <div class="tq-section-title">👩 Của Em — Thu & Chi 12 Tháng</div>
-  <div class="tq-chart-card">
-    ${barChartSvg(emData, '#ec4899', '#ef4444', '')}
-    <div class="tq-chart-legend">
-      <span class="tq-leg-item"><span class="tq-leg-dot" style="background:#ec4899"></span>Thu Ròng</span>
-      <span class="tq-leg-item"><span class="tq-leg-dot" style="background:#ef4444"></span>Khoản Chi</span>
-    </div>
-  </div>
-
-  ${!hasData ? '<div class="tq-empty">📭 Chưa có dữ liệu. Vui lòng thêm tháng cho Của Anh hoặc Của Em.</div>' : ''}
 </div>`;
 }
 
