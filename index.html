@@ -172,7 +172,13 @@ a{text-decoration:none;color:inherit}
   flex-shrink:0;
 }
 .topbar-title{font-size:17px;font-weight:800}
-.topbar-right{display:flex;align-items:center;gap:12px}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.btn-refresh{background:transparent;border:1.5px solid var(--border2);color:var(--text);
+  border-radius:10px;padding:6px 10px;font-size:15px;cursor:pointer;transition:.15s;line-height:1;
+  display:flex;align-items:center;justify-content:center}
+.btn-refresh:hover{background:var(--s3);border-color:var(--anh)}
+.btn-refresh.spinning{animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 .year-nav{display:flex;align-items:center;gap:4px}
 .year-btn{
   background:var(--s3);border:1px solid var(--border);
@@ -569,12 +575,7 @@ a{text-decoration:none;color:inherit}
 .tq-stat-block{background:var(--s2);padding:12px 14px}
 .tq-stat-label{font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:500}
 .tq-stat-value{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.2;word-break:break-all}
-.tq-card-footer{display:flex;border-top:1px solid var(--border)}
-.tq-footer-col{flex:1;display:flex;align-items:center;gap:10px;padding:11px 13px;border-right:1px solid var(--border)}
-.tq-footer-col:last-child{border-right:none}
-.tq-footer-icon{font-size:20px;flex-shrink:0}
-.tq-footer-label{font-size:10px;color:var(--muted);margin-bottom:2px}
-.tq-footer-val{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+
 @media(max-width:400px){
   .tq-stat-value{font-size:13px}
   .tq-footer-val{font-size:11px}
@@ -866,6 +867,7 @@ select.field-input option{background:var(--s2)}
           <span class="year-label" id="year-label">2026</span>
           <button class="year-btn" onclick="changeYear(1)">›</button>
         </div>
+        <button class="btn-refresh" id="topbar-refresh-btn" onclick="doRefresh()" title="Tải lại dữ liệu">🔄</button>
         <button class="btn-primary" id="topbar-add-btn" onclick="topbarAddClick()">
           <span class="btn-full-text">+ Thêm Tháng</span><span class="btn-short-text">+</span>
         </button>
@@ -1165,6 +1167,26 @@ function navigateTo(page) {
   renderPage(page);
 }
 
+function doRefresh() {
+  const btn = document.getElementById('topbar-refresh-btn');
+  if(btn) { btn.classList.add('spinning'); btn.disabled = true; }
+  const page = S.page;
+  const done = () => {
+    if(btn) { btn.classList.remove('spinning'); btn.disabled = false; }
+  };
+  if(page === 'tongquan') {
+    Promise.all([loadBDTYear('anh',S.year), loadBDTYear('em',S.year)]).then(() => { renderTongQuan(); done(); });
+  } else if(BDT_PAGES.includes(page)) {
+    loadBDTYear(page, S.year).then(() => { renderPage(page); done(); });
+  } else {
+    // reload quy data
+    sb.from('quy_funds').select('*, quy_transactions(*)').eq('key', page).maybeSingle().then(({data}) => {
+      if(data) S.quyCache[page] = { ...data, transactions: data.quy_transactions || [] };
+      renderPage(page); done();
+    });
+  }
+}
+
 function topbarAddClick() {
   if(BDT_PAGES.includes(S.page)) openMonthModal(null);
   else openTxModal(null, S.page);
@@ -1313,22 +1335,6 @@ function renderTongQuan() {
     </div>
   </div>
 
-  <div class="tq-card-footer">
-    <div class="tq-footer-col">
-      <span class="tq-footer-icon">💚</span>
-      <div>
-        <div class="tq-footer-label">Tổng thu ròng</div>
-        <div class="tq-footer-val" style="color:#26d98b">${fmt(cur.income)}</div>
-      </div>
-    </div>
-    <div class="tq-footer-col">
-      <span class="tq-footer-icon">🔴</span>
-      <div>
-        <div class="tq-footer-label">Tổng khoản chi</div>
-        <div class="tq-footer-val" style="color:#ff5252">${fmt(cur.expense)}</div>
-      </div>
-    </div>
-  </div>
 </div>`;
   }
 
