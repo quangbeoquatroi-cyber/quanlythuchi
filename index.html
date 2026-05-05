@@ -1463,32 +1463,135 @@ function openTxDetail(txId, quyKey) {
   const q  = S.quyCache[quyKey];
   const tx = (q?.transactions||[]).find(t => t.id === txId);
   if(!tx) return;
-  const isIn = tx.type === 'in';
+  const isIn   = tx.type === 'in';
   const anhAmt = tx.amount_anh || 0;
   const emAmt  = tx.amount_em  || 0;
   const total  = anhAmt + emAmt;
+  const accentColor = isIn ? 'var(--green)' : 'var(--red)';
+  const accentBg    = isIn ? 'rgba(38,217,139,.08)' : 'rgba(255,82,82,.08)';
+  const accentBorder= isIn ? 'rgba(38,217,139,.2)' : 'rgba(255,82,82,.2)';
+  const typeLabel   = isIn ? 'Nạp tiền' : 'Chi tiền';
+  const typeIcon    = isIn ? '📥' : '📤';
+
+  // Build contributor chips if both contributed
+  let contribHtml = '';
+  if(anhAmt && emAmt) {
+    contribHtml = `
+      <div style="display:flex;gap:10px;margin-top:4px">
+        <div style="flex:1;background:rgba(45,212,160,.08);border:1px solid rgba(45,212,160,.18);border-radius:10px;padding:10px 14px;text-align:center">
+          <div style="font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">👨 Anh</div>
+          <div style="font-size:15px;font-weight:800;color:var(--anh)">${fmtVND(anhAmt)}</div>
+        </div>
+        <div style="flex:1;background:rgba(249,168,37,.08);border:1px solid rgba(249,168,37,.18);border-radius:10px;padding:10px 14px;text-align:center">
+          <div style="font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">👩 Em</div>
+          <div style="font-size:15px;font-weight:800;color:var(--em)">${fmtVND(emAmt)}</div>
+        </div>
+      </div>`;
+  } else if(anhAmt) {
+    contribHtml = `<div style="margin-top:4px;background:rgba(45,212,160,.08);border:1px solid rgba(45,212,160,.18);border-radius:10px;padding:8px 14px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:var(--muted);font-weight:700">👨 Anh đóng</span><span style="font-weight:800;color:var(--anh)">${fmtVND(anhAmt)}</span></div>`;
+  } else if(emAmt) {
+    contribHtml = `<div style="margin-top:4px;background:rgba(249,168,37,.08);border:1px solid rgba(249,168,37,.18);border-radius:10px;padding:8px 14px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:var(--muted);font-weight:700">👩 Em đóng</span><span style="font-weight:800;color:var(--em)">${fmtVND(emAmt)}</span></div>`;
+  }
+
   const detail = `
-    <div style="background:var(--card);border-radius:14px;padding:20px;line-height:2;font-size:14px">
-      <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Ngày</span><strong>${fmtDate(tx.date)}</strong></div>
-      <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Loại</span><strong>${isIn?'📥 Nạp tiền':'📤 Chi tiền'}</strong></div>
-      <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Mô tả</span><strong>${tx.description||'—'}</strong></div>
-      <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Tổng tiền</span><strong style="color:${isIn?'var(--green)':'var(--red)'}">${fmtVND(total)}</strong></div>
-      ${anhAmt?`<div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">👨 Anh đóng</span><span style="color:var(--anh)">${fmtVND(anhAmt)}</span></div>`:''}
-      ${emAmt?`<div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">👩 Em đóng</span><span style="color:var(--em)">${fmtVND(emAmt)}</span></div>`:''}
-      ${tx.category?`<div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Danh mục</span><span class="cat-badge">${tx.category}</span></div>`:''}
-      ${tx.note?`<div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Ghi chú</span><em>${tx.note}</em></div>`:''}
+    <style>
+      #modal-detail .detail-row {
+        display:flex;justify-content:space-between;align-items:center;
+        padding:11px 0;border-bottom:1px solid var(--border);
+      }
+      #modal-detail .detail-row:last-child{border-bottom:none}
+      #modal-detail .detail-label {
+        font-size:12px;font-weight:700;color:var(--muted);
+        text-transform:uppercase;letter-spacing:.07em;
+      }
+      #modal-detail .detail-val {
+        font-size:14px;font-weight:700;color:var(--text);text-align:right;max-width:60%;
+      }
+    </style>
+
+    <!-- Hero amount block -->
+    <div style="
+      background:${accentBg};
+      border:1px solid ${accentBorder};
+      border-radius:16px;
+      padding:20px;
+      text-align:center;
+      margin-bottom:16px;
+      position:relative;
+      overflow:hidden;
+    ">
+      <div style="
+        position:absolute;top:-30px;right:-30px;
+        width:100px;height:100px;
+        background:${accentColor};
+        opacity:.06;border-radius:50%;
+      "></div>
+      <div style="font-size:11px;font-weight:800;color:${accentColor};text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px">
+        ${typeIcon} ${typeLabel}
+      </div>
+      <div style="font-size:30px;font-weight:900;color:${accentColor};letter-spacing:-.5px;line-height:1.1">
+        ${fmtVND(total)}
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:6px;font-weight:600">
+        ${fmtDate(tx.date)}
+      </div>
     </div>
-    <div style="display:flex;gap:10px;margin-top:16px">
-      <button class="btn-outline" style="flex:1" onclick="closeModalById('modal-detail')">Đóng</button>
-      <button class="btn-primary" style="flex:1" onclick="closeModalById('modal-detail');openTxModal('${txId}','${quyKey}')">✏️ Sửa</button>
+
+    <!-- Contributor breakdown -->
+    ${contribHtml ? `<div style="margin-bottom:16px">${contribHtml}</div>` : ''}
+
+    <!-- Info rows -->
+    <div style="background:var(--s2);border:1px solid var(--border);border-radius:14px;padding:4px 16px;margin-bottom:20px">
+      <div class="detail-row">
+        <span class="detail-label">Mô tả</span>
+        <span class="detail-val">${tx.description||'—'}</span>
+      </div>
+      ${tx.category ? `
+      <div class="detail-row">
+        <span class="detail-label">Danh mục</span>
+        <span class="cat-badge">${tx.category}</span>
+      </div>` : ''}
+      ${tx.note ? `
+      <div class="detail-row">
+        <span class="detail-label">Ghi chú</span>
+        <span class="detail-val" style="color:var(--muted);font-style:italic;font-weight:600">${tx.note}</span>
+      </div>` : ''}
+    </div>
+
+    <!-- Action buttons -->
+    <div style="display:flex;gap:10px">
+      <button onclick="closeModalById('modal-detail')" style="
+        flex:1;padding:14px;border-radius:12px;border:1.5px solid var(--border2);
+        background:transparent;color:var(--muted);font-size:14px;font-weight:700;
+        cursor:pointer;transition:all .18s;font-family:inherit;
+      " onmouseover="this.style.background='var(--s3)';this.style.color='var(--text)'"
+         onmouseout="this.style.background='transparent';this.style.color='var(--muted)'">
+        Đóng
+      </button>
+      <button onclick="closeModalById('modal-detail');openTxModal('${txId}','${quyKey}')" style="
+        flex:2;padding:14px;border-radius:12px;border:none;
+        background:linear-gradient(135deg,var(--anh),#00bfa5);
+        color:#071a14;font-size:14px;font-weight:800;
+        cursor:pointer;transition:opacity .18s;font-family:inherit;
+      " onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+        ✏️ Chỉnh sửa
+      </button>
     </div>`;
-  // reuse a simple modal
+
   let m = document.getElementById('modal-detail');
   if(!m){
     m = document.createElement('div');
     m.id = 'modal-detail';
     m.className = 'modal-overlay';
-    m.innerHTML = '<div class="modal" style="max-width:400px"><div class="modal-header"><span class="modal-title">Chi tiết giao dịch</span><button class="modal-close" onclick="closeModalById(\'modal-detail\')">✕</button></div><div id="modal-detail-body"></div></div>';
+    m.style.cssText = 'z-index:1100';
+    m.innerHTML = `
+      <div class="modal" style="max-width:420px;padding-bottom:4px">
+        <div class="modal-header" style="padding-bottom:12px">
+          <span class="modal-title" style="font-size:15px;font-weight:800;letter-spacing:-.2px">Chi tiết giao dịch</span>
+          <button class="modal-close" onclick="closeModalById('modal-detail')">✕</button>
+        </div>
+        <div id="modal-detail-body"></div>
+      </div>`;
     document.body.appendChild(m);
   }
   document.getElementById('modal-detail-body').innerHTML = detail;
