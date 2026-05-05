@@ -332,39 +332,79 @@ a{text-decoration:none;color:inherit}
 .stat-card-value.muted{color:var(--muted)}
 
 /* transaction table */
+/* ── TRANSACTION LIST (card-based, grouped by date) ─────── */
 .tx-table-wrap{
+  display:flex;flex-direction:column;gap:0;
+}
+.tx-table-header{display:none}
+.tx-day-group{
+  margin-bottom:6px;
+}
+.tx-day-label{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 4px 4px;
+  font-size:11px;font-weight:800;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.1em;
+}
+.tx-day-label::after{
+  content:'';flex:1;height:1px;background:var(--border);
+}
+.tx-cards{
+  display:flex;flex-direction:column;gap:6px;
+}
+.tx-card{
+  display:flex;align-items:center;gap:12px;
   background:var(--s1);border:1px solid var(--border);
-  border-radius:var(--r);overflow:hidden;
+  border-radius:12px;padding:12px 14px;
+  transition:all .18s;cursor:default;
+  position:relative;overflow:hidden;
 }
-.tx-table-header{
-  display:flex;padding:10px 16px;
-  border-bottom:1px solid var(--border);background:var(--s2);
-  font-size:11px;font-weight:800;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;
+.tx-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--tx-accent,var(--border2));
+  border-radius:3px 0 0 3px;
 }
-.tx-row{
-  display:flex;padding:11px 16px;
-  border-bottom:1px solid rgba(46,48,80,.4);
-  font-size:13px;align-items:center;
-  transition:background .15s;
+.tx-card:hover{
+  background:var(--s2);border-color:var(--border2);
+  transform:translateX(2px);
+  box-shadow:0 2px 12px rgba(0,0,0,.18);
 }
-.tx-row:last-child{border-bottom:none}
-.tx-row:hover{background:var(--s2)}
-.tx-row.total-row{
-  background:var(--s2);border-top:2px solid var(--border2);
-  font-weight:800;font-size:13px;
+.tx-card-icon{
+  width:36px;height:36px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;flex-shrink:0;
+  background:var(--s3);
 }
-.tx-col-date{width:90px;flex-shrink:0;color:var(--muted)}
-.tx-col-desc{flex:1;font-weight:600;padding:0 8px}
-.tx-col-anh{width:130px;flex-shrink:0;text-align:right;font-weight:700}
-.tx-col-em{display:none}
-.tx-col-cat{display:none}
-.tx-col-actions{width:90px;flex-shrink:0;display:flex;gap:6px;justify-content:flex-end}
+.tx-card-body{flex:1;min-width:0;}
+.tx-card-title{
+  font-size:13px;font-weight:700;color:var(--text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.tx-card-note{
+  font-size:11px;color:var(--muted);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.tx-card-badge{
+  display:inline-flex;align-items:center;gap:3px;
+  font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;
+  margin-top:4px;text-transform:uppercase;letter-spacing:.05em;
+}
+.tx-badge-in{background:rgba(72,199,142,.15);color:var(--green);}
+.tx-badge-out{background:rgba(255,82,82,.12);color:var(--red);}
+.tx-card-amt{
+  font-size:14px;font-weight:800;
+  font-family:'Courier New',monospace;
+  flex-shrink:0;text-align:right;
+}
+.tx-card-actions{
+  display:flex;gap:4px;flex-shrink:0;
+}
 .tx-act-btn{
   background:transparent;border:none;
-  width:26px;height:26px;border-radius:6px;
+  width:28px;height:28px;border-radius:8px;
   display:flex;align-items:center;justify-content:center;
   font-size:13px;color:var(--dim);
-  transition:all .15s;
+  transition:all .15s;cursor:pointer;
 }
 .tx-act-btn:hover{background:var(--s4);color:var(--text)}
 .tx-act-btn.del:hover{color:var(--red);background:rgba(255,82,82,.1)}
@@ -376,6 +416,12 @@ a{text-decoration:none;color:inherit}
 }
 .tx-type-in{color:var(--green)!important}
 .tx-type-out{color:var(--red)!important}
+.tx-col-date{display:none}
+.tx-col-desc{display:none}
+.tx-col-anh{display:none}
+.tx-col-em{display:none}
+.tx-col-cat{display:none}
+.tx-col-actions{display:none}
 
 /* ── MODALS ─────────────────────────────────────────────── */
 .modal-overlay{
@@ -608,21 +654,12 @@ a{text-decoration:none;color:inherit}
   .stat-card{padding:10px 12px}
   .stat-card-value{font-size:15px}
 
-  /* Transaction table */
-  .tx-table-header{display:none}
-  .tx-row{
-    flex-wrap:wrap;padding:10px 12px;gap:2px 4px;
-  }
-  .tx-col-date{width:auto;font-size:11px;color:var(--muted)}
-  .tx-col-desc{flex:1;min-width:0;font-size:13px;padding:0}
-  .tx-col-anh{width:auto;font-size:12px;text-align:right}
-  .tx-col-em{display:none}
-  .tx-col-cat{display:none}
-  .tx-col-actions{
-    flex-shrink:0;
-    width:auto;
-    display:flex;gap:4px;
-  }
+  /* Transaction cards - mobile responsive */
+  .tx-card{padding:10px 12px;gap:10px;}
+  .tx-card-icon{width:32px;height:32px;font-size:14px;}
+  .tx-card-title{font-size:12px;}
+  .tx-card-amt{font-size:13px;}
+  .tx-act-btn{width:26px;height:26px;font-size:12px;}
 
   /* Modals */
   .modal-overlay{padding:0;align-items:flex-end}
@@ -1308,27 +1345,36 @@ function renderQuy(key) {
   const emIn       = txs.filter(t=>t.type==='in').reduce((s,t)=>s+(t.amount_em||0),0);
   const lacking    = Math.max(0, target - balance);
 
-  const txRows = [...txs].sort((a,b)=> b.date.localeCompare(a.date)).map(t => {
-    const isIn   = t.type === 'in';
-    const anhAmt = t.amount_anh||0;
-    const emAmt  = t.amount_em||0;
-    const totalAmt = anhAmt + emAmt;
-    return `
-    <div class="tx-row">
-      <div class="tx-col-date">${fmtDate(t.date)}</div>
-      <div class="tx-col-desc">
-        <span style="margin-right:6px">${isIn?'📥':'📤'}</span>
-        ${t.description||'—'}
-        ${t.note?`<span style="color:var(--muted);font-size:12px;margin-left:6px">(${t.note})</span>`:''}
-      </div>
-      <div class="tx-col-anh ${isIn?'tx-type-in':'tx-type-out'}">${totalAmt?fmtVND(totalAmt):'—'}</div>
-      <div class="tx-col-actions">
-        <button class="tx-act-btn" onclick="openTxDetail('${t.id}','${key}')" title="Xem chi tiết">🔍</button>
-        <button class="tx-act-btn" onclick="openTxModal('${t.id}','${key}')" title="Sửa">✏️</button>
-        <button class="tx-act-btn del" onclick="confirmDeleteTx('${t.id}','${key}')" title="Xóa">🗑</button>
-      </div>
-    </div>`;
-  }).join('');
+  const txRows = (() => {
+    const sorted = [...txs].sort((a,b)=> b.date.localeCompare(a.date));
+    if(!sorted.length) return `<div style="padding:32px;text-align:center;color:var(--muted);font-size:13px">Chưa có giao dịch nào</div>`;
+    const groups = {};
+    sorted.forEach(t => { const d = t.date||''; if(!groups[d]) groups[d]=[]; groups[d].push(t); });
+    return Object.keys(groups).sort((a,b)=>b.localeCompare(a)).map(date => {
+      const label = date ? (([y,m,d2]) => `${d2}/${m}/${y}`)(date.split('-')) : '—';
+      const cards = groups[date].map(t => {
+        const isIn = t.type==='in';
+        const totalAmt = (t.amount_anh||0)+(t.amount_em||0);
+        const accent = isIn?'var(--green)':'var(--red)';
+        const emoji = isIn?'📥':'📤';
+        return `<div class="tx-card" style="--tx-accent:${accent}">
+          <div class="tx-card-icon">${emoji}</div>
+          <div class="tx-card-body">
+            <div class="tx-card-title">${t.description||'—'}</div>
+            ${t.note?`<div class="tx-card-note">${t.note}</div>`:''}
+            <span class="tx-card-badge ${isIn?'tx-badge-in':'tx-badge-out'}">${isIn?'+ Nạp':'− Chi'}</span>
+          </div>
+          <div class="tx-card-amt ${isIn?'tx-type-in':'tx-type-out'}">${totalAmt?fmtVND(totalAmt):'—'}</div>
+          <div class="tx-card-actions">
+            <button class="tx-act-btn" onclick="openTxDetail('${t.id}','${key}')" title="Xem chi tiết">🔍</button>
+            <button class="tx-act-btn" onclick="openTxModal('${t.id}','${key}')" title="Sửa">✏️</button>
+            <button class="tx-act-btn del" onclick="confirmDeleteTx('${t.id}','${key}')" title="Xóa">🗑</button>
+          </div>
+        </div>`;
+      }).join('');
+      return `<div class="tx-day-group"><div class="tx-day-label">${label}</div><div class="tx-cards">${cards}</div></div>`;
+    }).join('');
+  })();
 
   el.innerHTML = `
   <div class="quy-header">
@@ -1363,13 +1409,7 @@ function renderQuy(key) {
     <div class="stat-card"><div class="stat-card-label">⚠️ Còn thiếu</div><div class="stat-card-value muted font-mono">${lacking>0?fmtVND(lacking):'Đã đủ 🎉'}</div></div>
   </div>
   <div class="tx-table-wrap">
-    <div class="tx-table-header">
-      <div class="tx-col-date">Ngày</div>
-      <div class="tx-col-desc">Mô tả</div>
-      <div class="tx-col-anh">Tiền</div>
-      <div class="tx-col-actions"></div>
-    </div>
-    ${txRows || `<div style="padding:32px;text-align:center;color:var(--muted);font-size:13px">Chưa có giao dịch nào</div>`}
+    ${txRows}
   </div>`;
 }
 
