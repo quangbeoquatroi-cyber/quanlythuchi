@@ -611,16 +611,16 @@ a{text-decoration:none;color:inherit}
   /* Transaction table */
   .tx-table-header{display:none}
   .tx-row{
-    flex-wrap:wrap;padding:10px 12px;gap:4px;
-    position:relative;
+    flex-wrap:wrap;padding:10px 12px;gap:2px 4px;
   }
   .tx-col-date{width:auto;font-size:11px;color:var(--muted)}
-  .tx-col-desc{flex:1 0 calc(100% - 80px);font-size:13px;padding:0}
+  .tx-col-desc{flex:1;min-width:0;font-size:13px;padding:0}
   .tx-col-anh,.tx-col-em{width:auto;font-size:12px;text-align:left}
   .tx-col-cat,.tx-col-date{display:none}
   .tx-col-actions{
-    position:absolute;top:10px;right:8px;
+    flex-shrink:0;
     width:auto;
+    display:flex;gap:4px;
   }
   .tx-row.total-row .tx-col-desc{font-size:13px}
 
@@ -1083,9 +1083,9 @@ function navigateTo(page) {
   if(BDT_PAGES.includes(page)) {
     addBtn.textContent = '+ Thêm Tháng';
     addBtn.className = 'btn-primary' + (page==='em' ? ' btn-em' : '');
+    addBtn.style.display = '';
   } else {
-    addBtn.textContent = '+ Giao Dịch';
-    addBtn.className = 'btn-primary btn-quy';
+    addBtn.style.display = 'none';
   }
   renderPage(page);
 }
