@@ -788,6 +788,19 @@ a{text-decoration:none;color:inherit}
 .text-muted{color:var(--muted)}
 .font-mono{font-variant-numeric:tabular-nums}
 select.field-input option{background:var(--s2)}
+
+/* ── TOAST ──────────────────────────────────────────────── */
+.rf-toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--s3);color:var(--text);
+  border:1px solid var(--border);border-radius:var(--r2);
+  padding:10px 20px;font-size:13px;font-weight:600;
+  opacity:0;transition:opacity .25s,transform .25s;
+  pointer-events:none;z-index:9999;white-space:nowrap;
+  box-shadow:0 4px 16px rgba(0,0,0,.3);
+}
+.rf-toast.rf-show{opacity:1;transform:translateX(-50%) translateY(0)}
+.rf-toast.rf-error{background:#3b1a1a;border-color:#c62828;color:#ef9a9a}
 </style>
 </head>
 <body>
