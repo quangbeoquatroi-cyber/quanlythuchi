@@ -1463,119 +1463,230 @@ function openTxDetail(txId, quyKey) {
   const q  = S.quyCache[quyKey];
   const tx = (q?.transactions||[]).find(t => t.id === txId);
   if(!tx) return;
-  const isIn   = tx.type === 'in';
-  const anhAmt = tx.amount_anh || 0;
-  const emAmt  = tx.amount_em  || 0;
-  const total  = anhAmt + emAmt;
-  const accentColor = isIn ? 'var(--green)' : 'var(--red)';
-  const accentBg    = isIn ? 'rgba(38,217,139,.08)' : 'rgba(255,82,82,.08)';
-  const accentBorder= isIn ? 'rgba(38,217,139,.2)' : 'rgba(255,82,82,.2)';
-  const typeLabel   = isIn ? 'Nạp tiền' : 'Chi tiền';
-  const typeIcon    = isIn ? '📥' : '📤';
+  const isIn      = tx.type === 'in';
+  const anhAmt    = tx.amount_anh || 0;
+  const emAmt     = tx.amount_em  || 0;
+  const total     = anhAmt + emAmt;
+  const accentColor   = isIn ? 'var(--green)' : 'var(--red)';
+  const accentColorHex= isIn ? '#26d98b'      : '#ff5252';
+  const typeLabel     = isIn ? 'Nạp tiền'     : 'Chi tiền';
+  const typeIcon      = isIn ? '📥'            : '🗂️';
+  const badgeArrow    = isIn ? '↓'             : '↑';
+  const variantClass  = isIn ? 'dtv-in'        : 'dtv-out';
 
-  // Build contributor chips if both contributed
-  let contribHtml = '';
-  if(anhAmt && emAmt) {
-    contribHtml = `
-      <div style="display:flex;gap:10px;margin-top:4px">
-        <div style="flex:1;background:rgba(45,212,160,.08);border:1px solid rgba(45,212,160,.18);border-radius:10px;padding:10px 14px;text-align:center">
-          <div style="font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">👨 Anh</div>
-          <div style="font-size:15px;font-weight:800;color:var(--anh)">${fmtVND(anhAmt)}</div>
-        </div>
-        <div style="flex:1;background:rgba(249,168,37,.08);border:1px solid rgba(249,168,37,.18);border-radius:10px;padding:10px 14px;text-align:center">
-          <div style="font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">👩 Em</div>
-          <div style="font-size:15px;font-weight:800;color:var(--em)">${fmtVND(emAmt)}</div>
-        </div>
-      </div>`;
-  } else if(anhAmt) {
-    contribHtml = `<div style="margin-top:4px;background:rgba(45,212,160,.08);border:1px solid rgba(45,212,160,.18);border-radius:10px;padding:8px 14px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:var(--muted);font-weight:700">👨 Anh đóng</span><span style="font-weight:800;color:var(--anh)">${fmtVND(anhAmt)}</span></div>`;
-  } else if(emAmt) {
-    contribHtml = `<div style="margin-top:4px;background:rgba(249,168,37,.08);border:1px solid rgba(249,168,37,.18);border-radius:10px;padding:8px 14px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:var(--muted);font-weight:700">👩 Em đóng</span><span style="font-weight:800;color:var(--em)">${fmtVND(emAmt)}</span></div>`;
-  }
+  // compute running balance from quy snapshot
+  const allTx = (q.transactions || []);
+  let totalNap = 0, totalChi = 0;
+  allTx.forEach(t => {
+    if(t.type === 'in')  totalNap += (t.amount_anh||0) + (t.amount_em||0);
+    else                 totalChi += (t.amount_anh||0) + (t.amount_em||0);
+  });
+  const conLai = totalNap - totalChi;
+  const anhDong = q.totalAnh || anhAmt;
+
+  // contributor rows
+  const contribRows = [];
+  if(anhAmt) contribRows.push(`
+    <div class="dtv-info-row">
+      <div class="dtv-info-left">
+        <div class="dtv-info-icon" style="background:rgba(45,212,160,.15)">👨</div>
+        <span class="dtv-info-label">Anh đóng</span>
+      </div>
+      <span class="dtv-info-val" style="color:var(--anh)">${fmtVND(anhAmt)}</span>
+    </div>`);
+  if(emAmt) contribRows.push(`
+    <div class="dtv-info-row">
+      <div class="dtv-info-left">
+        <div class="dtv-info-icon" style="background:rgba(249,168,37,.15)">🥰</div>
+        <span class="dtv-info-label">Em đóng</span>
+      </div>
+      <span class="dtv-info-val" style="color:var(--em)">${fmtVND(emAmt)}</span>
+    </div>`);
 
   const detail = `
     <style>
-      #modal-detail .detail-row {
-        display:flex;justify-content:space-between;align-items:center;
-        padding:11px 0;border-bottom:1px solid var(--border);
+      .dtv-hero{
+        margin:0 0 14px;
+        border-radius:16px;padding:18px 18px 16px;
+        position:relative;overflow:hidden;
+        display:flex;align-items:center;gap:14px;
       }
-      #modal-detail .detail-row:last-child{border-bottom:none}
-      #modal-detail .detail-label {
-        font-size:12px;font-weight:700;color:var(--muted);
+      .dtv-out .dtv-hero{background:linear-gradient(135deg,rgba(255,82,82,.2),rgba(255,82,82,.07))}
+      .dtv-in  .dtv-hero{background:linear-gradient(135deg,rgba(38,217,139,.2),rgba(38,217,139,.07))}
+      .dtv-hero::after{
+        content:'';position:absolute;top:-40px;right:-40px;
+        width:130px;height:130px;border-radius:50%;
+        opacity:.07;pointer-events:none;
+      }
+      .dtv-out .dtv-hero::after{background:#ff5252}
+      .dtv-in  .dtv-hero::after{background:#26d98b}
+      .dtv-icon-wrap{
+        width:60px;height:60px;border-radius:50%;
+        display:flex;align-items:center;justify-content:center;
+        font-size:26px;flex-shrink:0;position:relative;
+      }
+      .dtv-out .dtv-icon-wrap{background:rgba(255,82,82,.18);color:#ff5252}
+      .dtv-in  .dtv-icon-wrap{background:rgba(38,217,139,.18);color:#26d98b}
+      .dtv-icon-wrap::before{
+        content:'';position:absolute;inset:-3px;border-radius:50%;
+        border:2px solid currentColor;opacity:.4;
+      }
+      .dtv-badge{
+        position:absolute;bottom:1px;right:1px;
+        width:20px;height:20px;border-radius:50%;
+        display:flex;align-items:center;justify-content:center;
+        font-size:10px;font-weight:900;
+      }
+      .dtv-out .dtv-badge{background:#ff5252;color:#fff}
+      .dtv-in  .dtv-badge{background:#26d98b;color:#071a14}
+      .dtv-hero-info{flex:1;min-width:0}
+      .dtv-type{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+      .dtv-out .dtv-type{color:#ff5252}
+      .dtv-in  .dtv-type{color:#26d98b}
+      .dtv-amount{font-size:28px;font-weight:900;letter-spacing:-.5px;line-height:1}
+      .dtv-out .dtv-amount{color:#ff5252}
+      .dtv-in  .dtv-amount{color:#26d98b}
+      .dtv-date{font-size:12px;font-weight:600;color:var(--muted);margin-top:5px;display:flex;align-items:center;gap:4px}
+      .dtv-status{
+        position:absolute;top:14px;right:14px;
+        background:rgba(38,217,139,.18);border:1px solid rgba(38,217,139,.4);
+        border-radius:20px;padding:4px 10px;
+        font-size:11px;font-weight:700;color:#26d98b;
+        display:flex;align-items:center;gap:4px;
+      }
+      .dtv-section{font-size:13px;font-weight:800;color:var(--text);margin-bottom:8px;letter-spacing:-.2px}
+      .dtv-card{
+        background:var(--s2);border:1px solid var(--border);
+        border-radius:14px;overflow:hidden;margin-bottom:14px;
+      }
+      .dtv-info-row{
+        display:flex;align-items:center;justify-content:space-between;
+        padding:12px 14px;border-bottom:1px solid var(--border);gap:10px;
+      }
+      .dtv-info-row:last-child{border-bottom:none}
+      .dtv-info-left{display:flex;align-items:center;gap:9px}
+      .dtv-info-icon{
+        width:30px;height:30px;border-radius:8px;
+        display:flex;align-items:center;justify-content:center;
+        font-size:15px;flex-shrink:0;
+      }
+      .dtv-info-label{font-size:13px;font-weight:600;color:var(--muted)}
+      .dtv-info-val{font-size:13px;font-weight:700;color:var(--text);text-align:right;max-width:55%}
+      .dtv-balance-grid{
+        display:grid;grid-template-columns:repeat(4,1fr);
+        gap:8px;padding:14px;
+      }
+      .dtv-bal-item{text-align:center}
+      .dtv-bal-label{
+        font-size:9px;font-weight:800;color:var(--muted);
         text-transform:uppercase;letter-spacing:.07em;
+        margin-bottom:5px;display:flex;align-items:center;justify-content:center;gap:3px;
       }
-      #modal-detail .detail-val {
-        font-size:14px;font-weight:700;color:var(--text);text-align:right;max-width:60%;
-      }
+      .dtv-bal-amt{font-size:12px;font-weight:800}
     </style>
 
-    <!-- Hero amount block -->
-    <div style="
-      background:${accentBg};
-      border:1px solid ${accentBorder};
-      border-radius:16px;
-      padding:20px;
-      text-align:center;
-      margin-bottom:16px;
-      position:relative;
-      overflow:hidden;
-    ">
-      <div style="
-        position:absolute;top:-30px;right:-30px;
-        width:100px;height:100px;
-        background:${accentColor};
-        opacity:.06;border-radius:50%;
-      "></div>
-      <div style="font-size:11px;font-weight:800;color:${accentColor};text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px">
-        ${typeIcon} ${typeLabel}
+    <div class="${variantClass}">
+      <!-- Hero -->
+      <div class="dtv-hero">
+        <div class="dtv-icon-wrap">
+          ${typeIcon}
+          <div class="dtv-badge">${badgeArrow}</div>
+        </div>
+        <div class="dtv-hero-info">
+          <div class="dtv-type">${typeLabel}</div>
+          <div class="dtv-amount">${fmtVND(total)}</div>
+          <div class="dtv-date">📅 ${fmtDate(tx.date)}</div>
+        </div>
+        <div class="dtv-status">✅ Thành công</div>
       </div>
-      <div style="font-size:30px;font-weight:900;color:${accentColor};letter-spacing:-.5px;line-height:1.1">
-        ${fmtVND(total)}
-      </div>
-      <div style="font-size:12px;color:var(--muted);margin-top:6px;font-weight:600">
-        ${fmtDate(tx.date)}
-      </div>
-    </div>
 
-    <!-- Contributor breakdown -->
-    ${contribHtml ? `<div style="margin-bottom:16px">${contribHtml}</div>` : ''}
-
-    <!-- Info rows -->
-    <div style="background:var(--s2);border:1px solid var(--border);border-radius:14px;padding:4px 16px;margin-bottom:20px">
-      <div class="detail-row">
-        <span class="detail-label">Mô tả</span>
-        <span class="detail-val">${tx.description||'—'}</span>
+      <!-- Thông tin -->
+      <div class="dtv-section">Thông tin giao dịch</div>
+      <div class="dtv-card">
+        <div class="dtv-info-row">
+          <div class="dtv-info-left">
+            <div class="dtv-info-icon" style="background:rgba(68,138,255,.15)">🗂️</div>
+            <span class="dtv-info-label">Loại giao dịch</span>
+          </div>
+          <span class="dtv-info-val" style="color:${accentColorHex}">${typeLabel}</span>
+        </div>
+        <div class="dtv-info-row">
+          <div class="dtv-info-left">
+            <div class="dtv-info-icon" style="background:rgba(38,217,139,.12)">📋</div>
+            <span class="dtv-info-label">Mô tả</span>
+          </div>
+          <span class="dtv-info-val">${tx.description||'—'}</span>
+        </div>
+        ${tx.category ? `
+        <div class="dtv-info-row">
+          <div class="dtv-info-left">
+            <div class="dtv-info-icon" style="background:rgba(38,217,139,.12)">🏷️</div>
+            <span class="dtv-info-label">Danh mục</span>
+          </div>
+          <span class="dtv-info-val">${tx.category}</span>
+        </div>` : ''}
+        <div class="dtv-info-row">
+          <div class="dtv-info-left">
+            <div class="dtv-info-icon" style="background:rgba(249,168,37,.15)">💰</div>
+            <span class="dtv-info-label">Số tiền</span>
+          </div>
+          <span class="dtv-info-val" style="color:${accentColorHex}">${fmtVND(total)}</span>
+        </div>
+        ${contribRows.join('')}
+        ${tx.note ? `
+        <div class="dtv-info-row">
+          <div class="dtv-info-left">
+            <div class="dtv-info-icon" style="background:rgba(68,138,255,.15)">📝</div>
+            <span class="dtv-info-label">Ghi chú</span>
+          </div>
+          <span class="dtv-info-val" style="color:var(--muted);font-style:italic">${tx.note}</span>
+        </div>` : ''}
       </div>
-      ${tx.category ? `
-      <div class="detail-row">
-        <span class="detail-label">Danh mục</span>
-        <span class="cat-badge">${tx.category}</span>
-      </div>` : ''}
-      ${tx.note ? `
-      <div class="detail-row">
-        <span class="detail-label">Ghi chú</span>
-        <span class="detail-val" style="color:var(--muted);font-style:italic;font-weight:600">${tx.note}</span>
-      </div>` : ''}
-    </div>
 
-    <!-- Action buttons -->
-    <div style="display:flex;gap:10px">
-      <button onclick="closeModalById('modal-detail')" style="
-        flex:1;padding:14px;border-radius:12px;border:1.5px solid var(--border2);
-        background:transparent;color:var(--muted);font-size:14px;font-weight:700;
-        cursor:pointer;transition:all .18s;font-family:inherit;
-      " onmouseover="this.style.background='var(--s3)';this.style.color='var(--text)'"
-         onmouseout="this.style.background='transparent';this.style.color='var(--muted)'">
-        Đóng
-      </button>
-      <button onclick="closeModalById('modal-detail');openTxModal('${txId}','${quyKey}')" style="
-        flex:2;padding:14px;border-radius:12px;border:none;
-        background:linear-gradient(135deg,var(--anh),#00bfa5);
-        color:#071a14;font-size:14px;font-weight:800;
-        cursor:pointer;transition:opacity .18s;font-family:inherit;
-      " onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
-        ✏️ Chỉnh sửa
-      </button>
+      <!-- Số dư -->
+      <div class="dtv-section">Số dư sau giao dịch</div>
+      <div class="dtv-card">
+        <div class="dtv-balance-grid">
+          <div class="dtv-bal-item">
+            <div class="dtv-bal-label">💳 Đã nạp</div>
+            <div class="dtv-bal-amt" style="color:var(--green)">${fmtVND(totalNap)}</div>
+          </div>
+          <div class="dtv-bal-item">
+            <div class="dtv-bal-label">🗂️ Đã chi</div>
+            <div class="dtv-bal-amt" style="color:var(--red)">${fmtVND(totalChi)}</div>
+          </div>
+          <div class="dtv-bal-item">
+            <div class="dtv-bal-label">💰 Còn lại</div>
+            <div class="dtv-bal-amt" style="color:var(--yellow)">${fmtVND(conLai)}</div>
+          </div>
+          <div class="dtv-bal-item">
+            <div class="dtv-bal-label">👨 Anh đóng</div>
+            <div class="dtv-bal-amt" style="color:var(--anh)">${fmtVND(anhAmt)}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div style="display:flex;gap:10px;padding-bottom:4px">
+        <button onclick="closeModalById('modal-detail')" style="
+          flex:1;padding:14px;border-radius:12px;border:1.5px solid var(--border2);
+          background:transparent;color:var(--muted);font-size:13px;font-weight:700;
+          cursor:pointer;transition:all .15s;font-family:inherit;
+          display:flex;align-items:center;justify-content:center;gap:6px;
+        " onmouseover="this.style.background='var(--s3)';this.style.color='var(--text)'"
+           onmouseout="this.style.background='transparent';this.style.color='var(--muted)'">
+          ⬇️ Tải biên lai
+        </button>
+        <button onclick="closeModalById('modal-detail');openTxModal('${txId}','${quyKey}')" style="
+          flex:2;padding:14px;border-radius:12px;border:none;
+          background:linear-gradient(135deg,var(--green),#00bfa5);
+          color:#071a14;font-size:13px;font-weight:800;
+          cursor:pointer;transition:opacity .15s;font-family:inherit;
+          display:flex;align-items:center;justify-content:center;gap:6px;
+        " onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+          ✏️ Chỉnh sửa
+        </button>
+      </div>
     </div>`;
 
   let m = document.getElementById('modal-detail');
