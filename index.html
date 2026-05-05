@@ -1537,7 +1537,7 @@ function openTxDetail(txId, quyKey) {
     contribRows.push(`
     <div class="dtv-info-row">
       <div class="dtv-info-left">
-        <div class="dtv-info-icon" style="background:rgba(249,168,37,.15)">${isIn ? '🥰' : '💗'}</div>
+        <div class="dtv-info-icon" style="background:rgba(249,168,37,.15)">${isIn ? '👩' : '💗'}</div>
         <span class="dtv-info-label">${emLabel}</span>
       </div>
       <span class="dtv-info-val" style="color:var(--em)">${fmtVND(emAmt)}</span>
@@ -1800,7 +1800,7 @@ function updateTxTypeUI() {
   if(type === 'out') {
     anhGroup.style.display = 'none';
     document.getElementById('tx-anh').value = 0;
-    emLabel.textContent = '💗 Em thanh toán (₫)';
+    emLabel.textContent = '👩 Em thanh toán (₫)';
   } else {
     anhGroup.style.display = '';
     emLabel.textContent = '💗 Em đóng (₫)';
