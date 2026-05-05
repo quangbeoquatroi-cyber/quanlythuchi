@@ -886,11 +886,11 @@ select.field-input option{background:var(--s2)}
       <div class="field-row" id="tx-contributors-row">
         <div class="field-group" id="tx-anh-group">
           <label class="field-label">💛 Anh đóng (₫)</label>
-          <input type="number" class="field-input" id="tx-anh" placeholder="0" min="0">
+          <input type="text" inputmode="numeric" class="field-input" id="tx-anh" placeholder="0">
         </div>
         <div class="field-group">
           <label class="field-label" id="tx-em-label">💗 Em đóng (₫)</label>
-          <input type="number" class="field-input" id="tx-em" placeholder="0" min="0">
+          <input type="text" inputmode="numeric" class="field-input" id="tx-em" placeholder="0">
         </div>
       </div>
       <div class="field-row">
@@ -1598,6 +1598,30 @@ function openTxDetail(txId, quyKey) {
   openModalById('modal-detail');
 }
 
+// ── MONEY INPUT FORMATTING ────────────────────────────────
+function formatMoneyInput(input) {
+  const raw = input.value.replace(/\./g, '').replace(/[^\d]/g, '');
+  const num = parseInt(raw, 10);
+  input.value = isNaN(num) ? '' : num.toLocaleString('vi-VN');
+}
+function parseMoneyInput(id) {
+  const val = document.getElementById(id).value.replace(/\./g, '').replace(/[^\d]/g, '');
+  return parseFloat(val) || 0;
+}
+function setMoneyInput(id, value) {
+  const el = document.getElementById(id);
+  el.value = (value && value !== 0) ? Number(value).toLocaleString('vi-VN') : '';
+}
+function attachMoneyInputs() {
+  ['tx-anh','tx-em'].forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener('input', function() { formatMoneyInput(this); });
+    el.addEventListener('blur',  function() { formatMoneyInput(this); });
+  });
+}
+document.addEventListener('DOMContentLoaded', attachMoneyInputs);
+
 function updateTxTypeUI() {
   const type = document.getElementById('tx-type').value;
   const anhGroup = document.getElementById('tx-anh-group');
@@ -1624,8 +1648,8 @@ function openTxModal(txId, quyKey) {
       document.getElementById('tx-date').value = tx.date || today();
       document.getElementById('tx-type').value = tx.type;
       document.getElementById('tx-desc').value = tx.description || '';
-      document.getElementById('tx-anh').value  = tx.amount_anh || '';
-      document.getElementById('tx-em').value   = tx.amount_em  || '';
+      document.getElementById('tx-anh').value  = tx.amount_anh ? Number(tx.amount_anh).toLocaleString('vi-VN') : '';
+      document.getElementById('tx-em').value   = tx.amount_em  ? Number(tx.amount_em).toLocaleString('vi-VN')  : '';
       document.getElementById('tx-cat').value  = tx.category || '';
       document.getElementById('tx-note').value = tx.note || '';
     }
@@ -1652,8 +1676,8 @@ async function saveTx() {
     date:        document.getElementById('tx-date').value,
     type:        document.getElementById('tx-type').value,
     description: document.getElementById('tx-desc').value.trim(),
-    amount_anh:  parseFloat(document.getElementById('tx-anh').value) || 0,
-    amount_em:   parseFloat(document.getElementById('tx-em').value)  || 0,
+    amount_anh:  parseFloat(document.getElementById('tx-anh').value.replace(/\./g,'')) || 0,
+    amount_em:   parseFloat(document.getElementById('tx-em').value.replace(/\./g,''))  || 0,
     category:    document.getElementById('tx-cat').value.trim(),
     note:        document.getElementById('tx-note').value.trim(),
   };
