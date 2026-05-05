@@ -184,6 +184,13 @@ a{text-decoration:none;color:inherit}
   transition:all .15s;
 }
 .year-btn:hover{background:var(--s4);color:var(--text)}
+.btn-refresh{
+  background:var(--s3);border:1px solid var(--border);
+  border-radius:8px;width:32px;height:32px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);transition:all .15s;flex-shrink:0;
+}
+.btn-refresh:hover{background:var(--s4);color:var(--text)}
 .year-label{
   font-size:15px;font-weight:800;color:var(--text);
   padding:0 8px;min-width:50px;text-align:center;
@@ -863,6 +870,11 @@ select.field-input option{background:var(--s2)}
           <span class="year-label" id="year-label">2026</span>
           <button class="year-btn" onclick="changeYear(1)">›</button>
         </div>
+        <button class="btn-refresh" id="topbar-refresh-btn" onclick="doRefresh()" title="Tải lại dữ liệu">
+          <svg id="rf-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block">
+            <path d="M13.65 2.35A8 8 0 1 0 15 8h-2a6 6 0 1 1-1.76-4.24L9 6h6V0l-1.35 2.35Z" fill="currentColor"/>
+          </svg>
+        </button>
         <button class="btn-primary" id="topbar-add-btn" onclick="topbarAddClick()">
           <span class="btn-full-text">+ Thêm Tháng</span><span class="btn-short-text">+</span>
         </button>
@@ -884,6 +896,7 @@ select.field-input option{background:var(--s2)}
 
 <!-- Sidebar overlay for mobile -->
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileMenu()"></div>
+<div class="rf-toast" id="rf-toast"></div>
 
 <!-- ════════════════ MODALS ════════════════ -->
 
@@ -1160,6 +1173,58 @@ function navigateTo(page) {
     addBtn.style.display = 'none';
   }
   renderPage(page);
+}
+
+// ── REFRESH ──────────────────────────────────────────────
+let _rfTimer = null;
+
+function showToast(msg, isError) {
+  const el = document.getElementById('rf-toast');
+  if(!el) return;
+  if(_rfTimer) clearTimeout(_rfTimer);
+  el.textContent = msg;
+  el.className = 'rf-toast' + (isError ? ' rf-error' : '');
+  // force reflow so transition fires
+  void el.offsetWidth;
+  el.classList.add('rf-show');
+  _rfTimer = setTimeout(() => el.classList.remove('rf-show'), 2200);
+}
+
+async function doRefresh() {
+  const btn = document.getElementById('topbar-refresh-btn');
+  if(!btn || btn.disabled) return;
+  btn.disabled = true;
+  btn.classList.add('spinning');
+
+  const page = S.page;
+  try {
+    if(page === 'tongquan') {
+      await Promise.all([
+        loadBDTYear('anh', S.year),
+        loadBDTYear('em',  S.year)
+      ]);
+      renderTongQuan();
+    } else if(BDT_PAGES.includes(page)) {
+      await loadBDTYear(page, S.year);
+      renderPage(page);
+    } else {
+      // Reload quy data for this key
+      const { data, error } = await sb.from('quy')
+        .select('*, quy_transactions(*)')
+        .eq('key', page)
+        .maybeSingle();
+      if(error) throw error;
+      if(data) S.quyCache[page] = { ...data, transactions: data.quy_transactions || [] };
+      renderPage(page);
+    }
+    showToast('✅ Đã cập nhật dữ liệu');
+  } catch(e) {
+    console.error('Refresh error:', e);
+    showToast('❌ Lỗi tải dữ liệu', true);
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('spinning');
+  }
 }
 
 function topbarAddClick() {
