@@ -757,6 +757,7 @@ a{text-decoration:none;color:inherit}
 .font-mono{font-variant-numeric:tabular-nums}
 select.field-input option{background:var(--s2)}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -794,6 +795,9 @@ select.field-input option{background:var(--s2)}
     </div>
     <nav class="sidebar-nav">
       <div class="nav-section-label">Bảng dự tính</div>
+      <div class="nav-item" id="nav-tongquan" onclick="navigateTo('tongquan')">
+        <span class="nav-icon">📊</span> Tổng Quan
+      </div>
       <div class="nav-item" id="nav-anh" onclick="navigateTo('anh')">
         <span class="nav-icon">👨</span> Của Anh
       </div>
@@ -844,6 +848,7 @@ select.field-input option{background:var(--s2)}
     </div>
 
     <div class="content">
+      <div class="page" id="page-tongquan"></div>
       <div class="page" id="page-anh"></div>
       <div class="page" id="page-em"></div>
       <div class="page" id="page-henho"></div>
@@ -1117,12 +1122,14 @@ function navigateTo(page) {
   document.getElementById('page-'+page).classList.add('active');
   // Topbar
   const titles = {
+    tongquan:'📊 Tổng Quan',
     anh:'👨 Của Anh', em:'👩 Của Em',
     henho:'💕 Quỹ Hẹn Hò', cuoi:'💍 Quỹ Nhẫn Cưới',
     tuthien:'❤️ Quỹ Từ Thiện', dulich:'✈️ Quỹ Du Lịch', backup:'🛡️ Quỹ Backup'
   };
   document.getElementById('topbar-title').textContent = titles[page] || '';
   document.getElementById('year-nav').style.display = BDT_PAGES.includes(page) ? 'flex' : 'none';
+  if(page==='tongquan') document.getElementById('year-nav').style.display='flex';
   const addBtn = document.getElementById('topbar-add-btn');
   if(BDT_PAGES.includes(page)) {
     addBtn.textContent = '+ Thêm Tháng';
@@ -1131,6 +1138,7 @@ function navigateTo(page) {
   } else {
     addBtn.style.display = 'none';
   }
+  if(page==='tongquan') addBtn.style.display='none';
   renderPage(page);
 }
 
@@ -1143,6 +1151,7 @@ function topbarAddClick() {
 function changeYear(delta) {
   S.year += delta;
   document.getElementById('year-label').textContent = S.year;
+  if(S.page==='tongquan') { renderTongQuan(); return; }
   const owner = S.page;
   if(!BDT_PAGES.includes(owner)) return;
   showSkeletons(owner);
@@ -1224,6 +1233,7 @@ async function deleteQuyTx(txId) {
 
 // ── RENDER PAGES ─────────────────────────────────────────
 function renderPage(page) {
+  if(page==='tongquan') { renderTongQuan(); return; }
   if(BDT_PAGES.includes(page)) renderBDT(page);
   else renderQuy(page);
 }
@@ -1669,7 +1679,47 @@ function openTxDetail(txId, quyKey) {
         display:flex;align-items:center;justify-content:center;gap:6px;
       }
       .dtv-btn-solid:hover{opacity:.88}
-    </style>
+    
+/* ── TỔNG QUAN ────────────────────────────────────────── */
+.tq-wrap{display:flex;flex-direction:column;gap:20px;}
+.tq-section-title{
+  font-size:13px;font-weight:800;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.1em;
+  margin-bottom:12px;display:flex;align-items:center;gap:8px;
+}
+.tq-section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.tq-owner-block{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:var(--r);padding:20px;
+}
+.tq-owner-header{
+  display:flex;align-items:center;gap:10px;margin-bottom:18px;
+}
+.tq-owner-name{font-size:16px;font-weight:800;}
+.tq-chart-row{
+  display:grid;grid-template-columns:1fr 1fr;gap:16px;
+}
+.tq-chart-box{
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:10px;padding:14px;
+}
+.tq-chart-label{
+  font-size:11px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;
+}
+.tq-chart-canvas-wrap{position:relative;height:160px;}
+.tq-total-row{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:12px;padding-top:10px;border-top:1px solid var(--border);
+  font-size:12px;color:var(--muted);
+}
+.tq-total-val{font-size:14px;font-weight:800;font-family:'Courier New',monospace;}
+.tq-empty{padding:32px;text-align:center;color:var(--muted);font-size:13px;}
+@media(max-width:600px){
+  .tq-chart-row{grid-template-columns:1fr;}
+  .tq-owner-block{padding:14px;}
+}
+</style>
 
     <div class="${variantClass}">
       <div class="dtv-body">
@@ -1965,5 +2015,118 @@ function toast(msg, type='success') {
   setTimeout(() => el.remove(), 3500);
 }
 </script>
+
+// ── TỔNG QUAN ──────────────────────────────────────────
+let tqCharts = {};
+
+function destroyTqCharts() {
+  Object.values(tqCharts).forEach(ch => { try { ch.destroy(); } catch(e){} });
+  tqCharts = {};
+}
+
+function renderTongQuan() {
+  destroyTqCharts();
+  const el = document.getElementById('page-tongquan');
+  const year = S.year;
+  const MONTHS = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+
+  function getOwnerData(owner) {
+    const yearData = (S.bdtCache[owner] || {})[year] || {};
+    const incArr = [], expArr = [];
+    for(let m=1; m<=12; m++) {
+      const d = yearData[m];
+      if(d && d.items) {
+        incArr.push(d.items.filter(i=>i.type==='income').reduce((s,i)=>s+(i.amount||0),0));
+        expArr.push(d.items.filter(i=>i.type==='expense').reduce((s,i)=>s+(i.amount||0),0));
+      } else { incArr.push(0); expArr.push(0); }
+    }
+    return { incArr, expArr };
+  }
+
+  function buildOwnerHTML(owner, label, color) {
+    const {incArr, expArr} = getOwnerData(owner);
+    const totalInc = incArr.reduce((a,b)=>a+b,0);
+    const totalExp = expArr.reduce((a,b)=>a+b,0);
+    return \`
+    <div class="tq-owner-block">
+      <div class="tq-owner-header">
+        <span style="font-size:22px">\${owner==='anh'?'👨':'👩'}</span>
+        <div class="tq-owner-name" style="color:\${color}">\${label}</div>
+        <span style="font-size:12px;color:var(--muted);margin-left:auto">Năm \${year}</span>
+      </div>
+      <div class="tq-chart-row">
+        <div class="tq-chart-box">
+          <div class="tq-chart-label">📈 Tổng Thu Ròng (12 tháng)</div>
+          <div class="tq-chart-canvas-wrap"><canvas id="chart-inc-\${owner}"></canvas></div>
+          <div class="tq-total-row">
+            <span>Tổng cả năm</span>
+            <span class="tq-total-val" style="color:var(--green)">\${fmtVND(totalInc)}</span>
+          </div>
+        </div>
+        <div class="tq-chart-box">
+          <div class="tq-chart-label">📉 Tổng Khoản Chi (12 tháng)</div>
+          <div class="tq-chart-canvas-wrap"><canvas id="chart-exp-\${owner}"></canvas></div>
+          <div class="tq-total-row">
+            <span>Tổng cả năm</span>
+            <span class="tq-total-val" style="color:var(--red)">\${fmtVND(totalExp)}</span>
+          </div>
+        </div>
+      </div>
+    </div>\`;
+  }
+
+  el.innerHTML = \`<div class="tq-wrap">
+    \${buildOwnerHTML('anh','Của Anh','var(--anh)')}
+    \${buildOwnerHTML('em','Của Em','var(--em)')}
+  </div>\`;
+
+  // Draw charts after DOM update
+  requestAnimationFrame(() => {
+    ['anh','em'].forEach(owner => {
+      const {incArr, expArr} = getOwnerData(owner);
+      const MONTHS = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+      const commonOpts = {
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{display:false}, tooltip:{
+          callbacks:{ label: ctx => ' ' + fmtVND(ctx.parsed.y) }
+        }},
+        scales:{
+          x:{ grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:'#8a8fa8',font:{size:10}} },
+          y:{ grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:'#8a8fa8',font:{size:10},
+            callback: v => v>=1e6 ? (v/1e6).toFixed(0)+'M' : v>=1e3 ? (v/1e3).toFixed(0)+'K' : v
+          }, beginAtZero:true }
+        }
+      };
+      // Income chart
+      const incCtx = document.getElementById('chart-inc-'+owner);
+      if(incCtx) {
+        tqCharts['inc-'+owner] = new Chart(incCtx, {
+          type:'bar',
+          data:{ labels:MONTHS, datasets:[{
+            data: incArr,
+            backgroundColor: owner==='anh' ? 'rgba(249,168,37,.55)' : 'rgba(236,64,122,.45)',
+            borderColor: owner==='anh' ? '#f9a825' : '#ec407a',
+            borderWidth:2, borderRadius:5,
+          }]},
+          options: commonOpts
+        });
+      }
+      // Expense chart
+      const expCtx = document.getElementById('chart-exp-'+owner);
+      if(expCtx) {
+        tqCharts['exp-'+owner] = new Chart(expCtx, {
+          type:'bar',
+          data:{ labels:MONTHS, datasets:[{
+            data: expArr,
+            backgroundColor: 'rgba(255,82,82,.35)',
+            borderColor: '#ff5252',
+            borderWidth:2, borderRadius:5,
+          }]},
+          options: commonOpts
+        });
+      }
+    });
+  });
+}
 </body>
 </html>
