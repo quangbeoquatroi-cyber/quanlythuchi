@@ -1198,25 +1198,15 @@ async function doRefresh() {
 
   const page = S.page;
   try {
-    if(page === 'tongquan') {
-      await Promise.all([
-        loadBDTYear('anh', S.year),
-        loadBDTYear('em',  S.year)
-      ]);
-      renderTongQuan();
-    } else if(BDT_PAGES.includes(page)) {
-      await loadBDTYear(page, S.year);
-      renderPage(page);
-    } else {
-      // Reload quy data for this key
-      const { data, error } = await sb.from('quy')
-        .select('*, quy_transactions(*)')
-        .eq('key', page)
-        .maybeSingle();
-      if(error) throw error;
-      if(data) S.quyCache[page] = { ...data, transactions: data.quy_transactions || [] };
-      renderPage(page);
-    }
+    // Xóa toàn bộ cache rồi load lại tất cả
+    S.bdtCache = { anh: {}, em: {} };
+    S.quyCache = {};
+    await Promise.all([
+      loadBDTYear('anh', S.year),
+      loadBDTYear('em',  S.year),
+      loadAllQuy()
+    ]);
+    renderPage(page);
     showToast('✅ Đã cập nhật dữ liệu');
   } catch(e) {
     console.error('Refresh error:', e);
