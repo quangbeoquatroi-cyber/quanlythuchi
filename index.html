@@ -308,7 +308,7 @@ a{text-decoration:none;color:inherit}
 .quy-title-area{display:flex;align-items:center;gap:12px}
 .quy-icon-big{font-size:32px}
 .quy-name{font-size:20px;font-weight:800}
-.quy-header-btns{display:flex;gap:8px}
+.quy-header-btns{display:flex;gap:8px;flex-wrap:wrap}
 .btn-outline{
   background:transparent;border:1px solid var(--border);
   border-radius:var(--r2);padding:7px 14px;
@@ -330,9 +330,10 @@ a{text-decoration:none;color:inherit}
 .stat-card{
   background:var(--s1);border:1px solid var(--border);
   border-radius:var(--r2);padding:14px 16px;
+  min-width:0;
 }
-.stat-card-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
-.stat-card-value{font-size:18px;font-weight:800}
+.stat-card-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat-card-value{font-size:18px;font-weight:800;word-break:break-all}
 .stat-card-value.green{color:var(--green)}
 .stat-card-value.red{color:var(--red)}
 .stat-card-value.blue{color:var(--blue)}
@@ -506,8 +507,8 @@ a{text-decoration:none;color:inherit}
   flex-shrink:0;
 }
 @media(max-width:700px){
-  .filter-bar{padding:10px 12px;gap:8px}
-  .filter-select{font-size:12px;padding:7px 28px 7px 10px}
+  .filter-bar{padding:8px 10px;gap:6px;margin-bottom:10px;border-radius:var(--r2)}
+  .filter-select{font-size:11px;padding:6px 24px 6px 9px;background-position:right 8px center}
   .tx-table-wrap{
     max-height:calc(4 * 72px + 3 * 6px + 2 * 28px);
     padding:8px 8px 4px;
@@ -697,7 +698,7 @@ a{text-decoration:none;color:inherit}
 /* ── TABLET (max 1024px) ── */
 @media(max-width:1024px){
   :root{--sidebar:190px}
-  .quy-stats{grid-template-columns:repeat(2,1fr)}
+  .quy-stats{grid-template-columns:repeat(3,1fr)}
   .tx-col-cat{display:none}
   .mc-sum-amount{font-size:17px}
 }
@@ -769,12 +770,17 @@ a{text-decoration:none;color:inherit}
   .mc-row{font-size:12px}
 
   /* Quy page */
-  .quy-header{padding:14px 16px}
-  .quy-name{font-size:16px}
-  .quy-icon-big{font-size:24px}
-  .quy-stats{grid-template-columns:repeat(2,1fr);gap:8px}
+  .quy-header{padding:12px 14px;margin-bottom:10px}
+  .quy-header-top{margin-bottom:10px;gap:8px}
+  .quy-name{font-size:15px}
+  .quy-icon-big{font-size:22px}
+  .quy-header-btns{gap:6px}
+  .btn-outline{padding:6px 10px;font-size:12px;gap:4px}
+  .btn-primary.btn-quy{padding:6px 10px;font-size:12px}
+  .quy-stats{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
   .stat-card{padding:10px 12px}
-  .stat-card-value{font-size:15px}
+  .stat-card-label{font-size:10px;letter-spacing:.04em}
+  .stat-card-value{font-size:14px}
 
   /* Transaction cards - mobile responsive */
   .tx-card{padding:10px 12px;gap:10px;}
@@ -814,6 +820,9 @@ a{text-decoration:none;color:inherit}
   .mc-summary{grid-template-columns:1fr}
   .mc-sum-col:first-child{border-right:none;border-bottom:1px solid var(--border)}
   .quy-stats{grid-template-columns:1fr 1fr}
+  .stat-card-value{font-size:13px}
+  .stat-card-label{font-size:9px}
+  .stat-card{padding:9px 10px}
 }
 
 /* ── MENU TOGGLE (mobile only) ─────────────────────────── */
@@ -868,6 +877,7 @@ a{text-decoration:none;color:inherit}
   #toast-container{bottom:16px}
 }
 .btn-short-text{display:none}
+.quy-btn-text{display:inline}
 @media(max-width:700px){
   .btn-full-text{display:none}
   .btn-short-text{display:inline;font-size:16px;font-weight:900}
@@ -1701,8 +1711,8 @@ function renderQuy(key) {
         </div>
       </div>
       <div class="quy-header-btns">
-        <button class="btn-outline" onclick="openQuyConfig('${key}')">⚙️ Cài đặt</button>
-        <button class="btn-primary btn-quy" onclick="openTxModal(null,'${key}')">+ Giao dịch</button>
+        <button class="btn-outline" onclick="openQuyConfig('${key}')">⚙️ <span class="quy-btn-text">Cài đặt</span></button>
+        <button class="btn-primary btn-quy" onclick="openTxModal(null,'${key}')">+ <span class="quy-btn-text">Giao dịch</span></button>
       </div>
     </div>
     ${target>0?`
