@@ -424,6 +424,45 @@ a{text-decoration:none;color:inherit}
   background:var(--s3);color:var(--muted);
   display:inline-block;white-space:nowrap;
 }
+
+/* ── FILTER BAR ─────────────────────────────────────────── */
+.filter-bar{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:var(--r);padding:12px 16px;margin-bottom:14px;
+  display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+}
+
+.filter-select{
+  background:var(--s3);border:1px solid var(--border);
+  border-radius:var(--r2);padding:8px 12px;
+  color:var(--text);font-size:13px;font-family:inherit;
+  cursor:pointer;transition:border-color .2s;
+  -webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b9e80' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;
+  padding-right:30px;
+}
+.filter-select:focus{border-color:var(--anh);outline:none}
+.filter-select option{background:var(--s2);color:var(--text)}
+.filter-btn-clear{
+  background:rgba(255,82,82,.1);border:1px solid rgba(255,82,82,.25);
+  border-radius:var(--r2);padding:8px 12px;
+  color:var(--red);font-size:12px;font-weight:700;font-family:inherit;
+  cursor:pointer;white-space:nowrap;transition:all .15s;
+  display:none;
+}
+.filter-btn-clear.visible{display:flex;align-items:center;gap:4px}
+.filter-btn-clear:hover{background:rgba(255,82,82,.2)}
+.filter-result-count{
+  font-size:12px;color:var(--muted);
+  padding:4px 10px;background:var(--s2);border-radius:20px;
+  border:1px solid var(--border);white-space:nowrap;
+  flex-shrink:0;
+}
+@media(max-width:700px){
+  .filter-bar{padding:10px 12px;gap:8px}
+  .filter-select{font-size:12px;padding:7px 28px 7px 10px}
+}
 .tx-type-in{color:var(--green)!important}
 .tx-type-out{color:var(--red)!important}
 .tx-col-date{display:none}
@@ -432,59 +471,6 @@ a{text-decoration:none;color:inherit}
 .tx-col-em{display:none}
 .tx-col-cat{display:none}
 .tx-col-actions{display:none}
-
-/* ── QUY SEARCH/FILTER BAR ─────────────────────────────── */
-.quy-filter-bar{
-  display:flex;flex-wrap:wrap;gap:8px;align-items:center;
-  padding:12px 16px;
-  background:var(--s2);
-  border:1px solid var(--border);
-  border-radius:var(--r);
-  margin-bottom:12px;
-}
-.quy-filter-search{
-  flex:1;min-width:160px;
-  display:flex;align-items:center;gap:8px;
-  background:var(--s3);
-  border:1px solid var(--border);
-  border-radius:var(--r2);
-  padding:8px 12px;
-  transition:border-color .2s;
-}
-.quy-filter-search:focus-within{border-color:var(--border2);}
-.quy-filter-search input{
-  background:transparent;border:none;color:var(--text);
-  font-size:13px;width:100%;
-}
-.quy-filter-search input::placeholder{color:var(--muted);}
-.quy-filter-search .search-icon{color:var(--muted);font-size:14px;flex-shrink:0;}
-.quy-filter-selects{
-  display:flex;flex-wrap:wrap;gap:6px;align-items:center;
-}
-.quy-filter-sel{
-  background:var(--s3);border:1px solid var(--border);
-  border-radius:var(--r2);padding:7px 10px;
-  color:var(--text);font-size:12px;font-weight:600;
-  cursor:pointer;transition:border-color .2s;
-  font-family:inherit;
-  -webkit-appearance:none;appearance:none;
-  padding-right:24px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b9e80'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;
-  background-position:right 8px center;
-}
-.quy-filter-sel:focus{outline:none;border-color:var(--border2);}
-.quy-filter-reset{
-  background:transparent;border:1px solid var(--border);
-  border-radius:var(--r2);padding:7px 10px;
-  color:var(--muted);font-size:12px;font-weight:600;
-  cursor:pointer;transition:all .15s;font-family:inherit;
-  white-space:nowrap;
-}
-.quy-filter-reset:hover{border-color:var(--red);color:var(--red);}
-.quy-filter-count{
-  font-size:11px;color:var(--muted);padding:0 4px;white-space:nowrap;
-}
 
 /* ── MODALS ─────────────────────────────────────────────── */
 .modal-overlay{
@@ -746,12 +732,6 @@ a{text-decoration:none;color:inherit}
   .tx-card-title{font-size:12px;}
   .tx-card-amt{font-size:13px;}
   .tx-act-btn{width:26px;height:26px;font-size:12px;}
-
-  /* Filter bar - mobile */
-  .quy-filter-bar{flex-direction:column;align-items:stretch;gap:6px;padding:10px 12px;}
-  .quy-filter-selects{gap:4px;}
-  .quy-filter-sel{font-size:11px;padding:6px 24px 6px 8px;}
-  .quy-filter-reset{font-size:11px;padding:6px 8px;}
 
   /* Modals */
   .modal-overlay{padding:0;align-items:flex-end}
@@ -1141,7 +1121,32 @@ const S = {
   editTxId: null,
   editTxQuyId: null,
   editCfgQuyId: null,
+  // filter state per quy page
+  filters: {},
 };
+
+function getFilter(key) {
+  if(!S.filters[key]) S.filters[key] = { type: '', cat: '', year: '', month: '' };
+  return S.filters[key];
+}
+
+function setFilter(key, field, value) {
+  getFilter(key)[field] = value;
+  renderQuy(key);
+}
+
+function clearFilter(key) {
+  S.filters[key] = { type: '', cat: '', year: '', month: '' };
+  // reset DOM inputs
+  const wrap = document.getElementById('page-'+key);
+  if(wrap) {
+    const t = wrap.querySelector('.filter-type');  if(t) t.value='';
+    const c = wrap.querySelector('.filter-cat');   if(c) c.value='';
+    const y = wrap.querySelector('.filter-year');  if(y) y.value='';
+    const mo = wrap.querySelector('.filter-month'); if(mo) mo.value='';
+  }
+  renderQuy(key);
+}
 
 // ── HELPERS ──────────────────────────────────────────────
 const fmtVND = n => {
@@ -1561,106 +1566,6 @@ function toggleMonthDetail(owner, year, month) {
 }
 
 // ── QUY RENDER ───────────────────────────────────────────
-// ── QUY FILTER STATE ────────────────────────────────────
-const QF = {}; // { [key]: { search, month, year, type, category } }
-
-function getQF(key) {
-  if(!QF[key]) QF[key] = { search:'', month:'', year:'', type:'', category:'' };
-  return QF[key];
-}
-
-function applyQuyFilter(key) {
-  const f = getQF(key);
-  const searchEl = document.getElementById('qf-search-'+key);
-  const monthEl  = document.getElementById('qf-month-'+key);
-  const yearEl   = document.getElementById('qf-year-'+key);
-  const typeEl   = document.getElementById('qf-type-'+key);
-  const catEl    = document.getElementById('qf-cat-'+key);
-  if(searchEl) f.search   = searchEl.value.toLowerCase().trim();
-  if(monthEl)  f.month    = monthEl.value;
-  if(yearEl)   f.year     = yearEl.value;
-  if(typeEl)   f.type     = typeEl.value;
-  if(catEl)    f.category = catEl.value;
-  renderQuyTxList(key);
-}
-
-function resetQuyFilter(key) {
-  QF[key] = { search:'', month:'', year:'', type:'', category:'' };
-  const ids = ['qf-search-','qf-month-','qf-year-','qf-type-','qf-cat-'];
-  ids.forEach(prefix => {
-    const el = document.getElementById(prefix+key);
-    if(el) el.value = '';
-  });
-  renderQuyTxList(key);
-}
-
-function renderQuyTxList(key) {
-  const q   = S.quyCache[key];
-  if(!q) return;
-  const f   = getQF(key);
-  const allTxs = q.transactions || [];
-
-  // Apply filters
-  let txs = allTxs.filter(t => {
-    if(f.type     && t.type !== f.type) return false;
-    if(f.category && (t.category||'') !== f.category) return false;
-    if(f.year || f.month) {
-      const parts = (t.date||'').split('-'); // [yyyy, mm, dd]
-      if(f.year  && parts[0] !== f.year)  return false;
-      if(f.month && parts[1] !== f.month) return false;
-    }
-    if(f.search) {
-      const hay = ((t.description||'')+' '+(t.note||'')+' '+(t.category||'')).toLowerCase();
-      if(!hay.includes(f.search)) return false;
-    }
-    return true;
-  });
-
-  const countEl = document.getElementById('qf-count-'+key);
-  if(countEl) countEl.textContent = txs.length < allTxs.length
-    ? `${txs.length} / ${allTxs.length} giao dịch`
-    : `${allTxs.length} giao dịch`;
-
-  const wrap = document.getElementById('quy-tx-wrap-'+key);
-  if(!wrap) return;
-
-  if(!txs.length) {
-    wrap.innerHTML = `<div style="padding:40px;text-align:center;color:var(--muted);font-size:13px">
-      <div style="font-size:32px;margin-bottom:8px">🔍</div>
-      Không tìm thấy giao dịch nào
-    </div>`;
-    return;
-  }
-
-  const sorted = [...txs].sort((a,b)=> b.date.localeCompare(a.date));
-  const groups = {};
-  sorted.forEach(t => { const d = t.date||''; if(!groups[d]) groups[d]=[]; groups[d].push(t); });
-  wrap.innerHTML = Object.keys(groups).sort((a,b)=>b.localeCompare(a)).map(date => {
-    const label = date ? (([y,m,d2]) => `${d2}/${m}/${y}`)(date.split('-')) : '—';
-    const cards = groups[date].map(t => {
-      const isIn = t.type==='in';
-      const totalAmt = (t.amount_anh||0)+(t.amount_em||0);
-      const accent = isIn?'var(--green)':'var(--red)';
-      const emoji = isIn?'📥':'📤';
-      return `<div class="tx-card" style="--tx-accent:${accent}">
-        <div class="tx-card-icon">${emoji}</div>
-        <div class="tx-card-body">
-          <div class="tx-card-title">${t.description||'—'}</div>
-          ${t.note?`<div class="tx-card-note">${t.note}</div>`:''}
-          ${(t.category||'') ? `<span class="tx-card-badge tx-badge-cat">${t.category}</span>` : `<span class="tx-card-badge ${isIn?'tx-badge-in':'tx-badge-out'}">${isIn?'+ Nạp':'− Chi'}</span>`}
-        </div>
-        <div class="tx-card-amt ${isIn?'tx-type-in':'tx-type-out'}">${totalAmt?fmtVND(totalAmt):'—'}</div>
-        <div class="tx-card-actions">
-          <button class="tx-act-btn" onclick="openTxDetail('${t.id}','${key}')" title="Xem chi tiết">🔍</button>
-          <button class="tx-act-btn" onclick="openTxModal('${t.id}','${key}')" title="Sửa">✏️</button>
-          <button class="tx-act-btn del" onclick="confirmDeleteTx('${t.id}','${key}')" title="Xóa">🗑</button>
-        </div>
-      </div>`;
-    }).join('');
-    return `<div class="tx-day-group"><div class="tx-day-label">${label}</div><div class="tx-cards">${cards}</div></div>`;
-  }).join('');
-}
-
 function renderQuy(key) {
   const el  = document.getElementById('page-'+key);
   const q   = S.quyCache[key];
@@ -1678,13 +1583,62 @@ function renderQuy(key) {
   const emIn       = txs.filter(t=>t.type==='in').reduce((s,t)=>s+(t.amount_em||0),0);
   const lacking    = Math.max(0, target - balance);
 
-  // Build unique years & categories for filter dropdowns
-  const years = [...new Set(txs.map(t=>(t.date||'').split('-')[0]).filter(Boolean))].sort((a,b)=>b-a);
+  // collect unique categories for filter dropdown
   const cats  = [...new Set(txs.map(t=>t.category||'').filter(Boolean))].sort();
-  const yearOpts = years.map(y=>`<option value="${y}">${y}</option>`).join('');
-  const catOpts  = cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+  const years = [...new Set(txs.map(t=>(t.date||'').slice(0,4)).filter(Boolean))].sort((a,b)=>b-a);
 
-  const f = getQF(key);
+  // get current filter state
+  const f = getFilter(key);
+  const hasFilter = !!(f.type || f.cat || f.year || f.month);
+
+  // apply filters
+  let filtered = [...txs];
+  if(f.type)  filtered = filtered.filter(t => t.type === f.type);
+  if(f.cat)   filtered = filtered.filter(t => (t.category||'') === f.cat);
+  if(f.year)  filtered = filtered.filter(t => (t.date||'').startsWith(f.year));
+  if(f.month) filtered = filtered.filter(t => {
+    const parts = (t.date||'').split('-');
+    return parts[1] === f.month;
+  });
+
+
+  const txRows = (() => {
+    const sorted = [...filtered].sort((a,b)=> b.date.localeCompare(a.date));
+    if(!sorted.length) {
+      if(hasFilter) return `<div style="padding:40px;text-align:center;color:var(--muted);font-size:13px"><div style="font-size:36px;margin-bottom:10px">🔍</div><div style="font-weight:700;color:var(--text);margin-bottom:4px">Không tìm thấy kết quả</div>Thử thay đổi bộ lọc</div>`;
+      return `<div style="padding:32px;text-align:center;color:var(--muted);font-size:13px">Chưa có giao dịch nào</div>`;
+    }
+    const groups = {};
+    sorted.forEach(t => { const d = t.date||''; if(!groups[d]) groups[d]=[]; groups[d].push(t); });
+    return Object.keys(groups).sort((a,b)=>b.localeCompare(a)).map(date => {
+      const label = date ? (([y,m,d2]) => `${d2}/${m}/${y}`)(date.split('-')) : '—';
+      const cards = groups[date].map(t => {
+        const isIn = t.type==='in';
+        const totalAmt = (t.amount_anh||0)+(t.amount_em||0);
+        const accent = isIn?'var(--green)':'var(--red)';
+        const emoji = isIn?'📥':'📤';
+        return `<div class="tx-card" style="--tx-accent:${accent}">
+          <div class="tx-card-icon">${emoji}</div>
+          <div class="tx-card-body">
+            <div class="tx-card-title">${t.description||'—'}</div>
+            ${t.note?`<div class="tx-card-note">${t.note}</div>`:''}
+            ${(t.category||'') ? `<span class="tx-card-badge tx-badge-cat">${t.category}</span>` : `<span class="tx-card-badge ${isIn?'tx-badge-in':'tx-badge-out'}">${isIn?'+ Nạp':'− Chi'}</span>`}
+          </div>
+          <div class="tx-card-amt ${isIn?'tx-type-in':'tx-type-out'}">${totalAmt?fmtVND(totalAmt):'—'}</div>
+          <div class="tx-card-actions">
+            <button class="tx-act-btn" onclick="openTxDetail('${t.id}','${key}')" title="Xem chi tiết">🔍</button>
+            <button class="tx-act-btn" onclick="openTxModal('${t.id}','${key}')" title="Sửa">✏️</button>
+            <button class="tx-act-btn del" onclick="confirmDeleteTx('${t.id}','${key}')" title="Xóa">🗑</button>
+          </div>
+        </div>`;
+      }).join('');
+      return `<div class="tx-day-group"><div class="tx-day-label">${label}</div><div class="tx-cards">${cards}</div></div>`;
+    }).join('');
+  })();
+
+  const catOptions  = cats.map(c => `<option value="${c}" ${f.cat===c?'selected':''}>${c}</option>`).join('');
+  const yearOptions = years.map(y => `<option value="${y}" ${f.year===y?'selected':''}>${y}</option>`).join('');
+  const monthOptions = Array.from({length:12},(_,i)=>{const m=String(i+1).padStart(2,'0');return `<option value="${m}" ${f.month===m?'selected':''}>Tháng ${i+1}</option>`;}).join('');
 
   el.innerHTML = `
   <div class="quy-header">
@@ -1718,50 +1672,30 @@ function renderQuy(key) {
     <div class="stat-card"><div class="stat-card-label">👩 Em đóng</div><div class="stat-card-value em font-mono">${fmtVND(emIn)}</div></div>
     <div class="stat-card"><div class="stat-card-label">⚠️ Còn thiếu</div><div class="stat-card-value muted font-mono">${lacking>0?fmtVND(lacking):'Đã đủ 🎉'}</div></div>
   </div>
-
-  <div class="quy-filter-bar">
-    <div class="quy-filter-search">
-      <span class="search-icon">🔍</span>
-      <input id="qf-search-${key}" type="text" placeholder="Tìm kiếm giao dịch..." value="${f.search||''}"
-        oninput="applyQuyFilter('${key}')">
-    </div>
-    <div class="quy-filter-selects">
-      <select id="qf-year-${key}" class="quy-filter-sel" onchange="applyQuyFilter('${key}')">
-        <option value="">Tất cả năm</option>
-        ${yearOpts}
-      </select>
-      <select id="qf-month-${key}" class="quy-filter-sel" onchange="applyQuyFilter('${key}')">
-        <option value="">Tất cả tháng</option>
-        <option value="01">Tháng 1</option><option value="02">Tháng 2</option>
-        <option value="03">Tháng 3</option><option value="04">Tháng 4</option>
-        <option value="05">Tháng 5</option><option value="06">Tháng 6</option>
-        <option value="07">Tháng 7</option><option value="08">Tháng 8</option>
-        <option value="09">Tháng 9</option><option value="10">Tháng 10</option>
-        <option value="11">Tháng 11</option><option value="12">Tháng 12</option>
-      </select>
-      <select id="qf-type-${key}" class="quy-filter-sel" onchange="applyQuyFilter('${key}')">
-        <option value="">Tất cả loại</option>
-        <option value="in">📥 Nạp</option>
-        <option value="out">📤 Chi</option>
-      </select>
-      ${cats.length ? `<select id="qf-cat-${key}" class="quy-filter-sel" onchange="applyQuyFilter('${key}')">
-        <option value="">Tất cả danh mục</option>
-        ${catOpts}
-      </select>` : ''}
-      <button class="quy-filter-reset" onclick="resetQuyFilter('${key}')">✕ Xóa lọc</button>
-      <span class="quy-filter-count" id="qf-count-${key}"></span>
-    </div>
+  <div class="filter-bar">
+    <select class="filter-select filter-year" onchange="setFilter('${key}','year',this.value)">
+      <option value="" ${!f.year?'selected':''}>-- Năm --</option>
+      ${yearOptions}
+    </select>
+    <select class="filter-select filter-month" onchange="setFilter('${key}','month',this.value)">
+      <option value="" ${!f.month?'selected':''}>-- Tháng --</option>
+      ${monthOptions}
+    </select>
+    <select class="filter-select filter-type" onchange="setFilter('${key}','type',this.value)">
+      <option value="" ${!f.type?'selected':''}>Tất cả loại</option>
+      <option value="in" ${f.type==='in'?'selected':''}>📥 Nạp tiền</option>
+      <option value="out" ${f.type==='out'?'selected':''}>📤 Chi tiền</option>
+    </select>
+    <select class="filter-select filter-cat" onchange="setFilter('${key}','cat',this.value)">
+      <option value="" ${!f.cat?'selected':''}>-- Danh mục --</option>
+      ${catOptions}
+    </select>
+    <button class="filter-btn-clear ${hasFilter?'visible':''}" onclick="clearFilter('${key}')">✕ Xóa lọc</button>
+    ${hasFilter ? `<span class="filter-result-count">${filtered.length} kết quả</span>` : ''}
   </div>
-
-  <div class="tx-table-wrap" id="quy-tx-wrap-${key}"></div>`;
-
-  // Restore filter values in selects
-  ['year','month','type','category'].forEach(field => {
-    const el2 = document.getElementById('qf-'+field+'-'+key);
-    if(el2 && f[field]) el2.value = f[field];
-  });
-
-  renderQuyTxList(key);
+  <div class="tx-table-wrap">
+    ${txRows}
+  </div>`;
 }
 
 // ── MONTH MODAL ──────────────────────────────────────────
