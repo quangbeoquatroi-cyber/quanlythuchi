@@ -50,9 +50,10 @@ body{
 }
 button{font-family:inherit;cursor:pointer;border:none;outline:none}
 input,select,textarea{font-family:inherit;outline:none}
-/* iOS auto-zoom fix: font-size < 16px triggers zoom on focus */
+/* iOS auto-zoom fix: chỉ áp cho input/textarea khi focus, không đụng select */
 @media (max-width:768px){
-  input,select,textarea{ font-size:16px!important; }
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea{ font-size:16px!important; }
 }
 a{text-decoration:none;color:inherit}
 
