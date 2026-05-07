@@ -1155,8 +1155,28 @@ a{text-decoration:none;color:inherit}
   #toast-container{bottom:80px;right:12px;left:12px}
   .toast{min-width:auto;max-width:100%}
 
-  /* Login box */
-  .login-box{padding:28px 20px;border-radius:16px}
+  /* Login — mobile fix */
+  #screen-login{
+    padding:0 20px;          /* margin kéo đều 2 bên */
+    align-items:center;
+  }
+  .login-box-wrap{
+    width:100%;
+    max-width:100%;          /* không bị cắt */
+    padding:1.5px;           /* mỏng hơn để viền glow không bị lộ */
+    border-radius:24px;
+  }
+  .login-box-wrap::before{ border-radius:24px; }
+  .login-box-wrap::after { border-radius:28px; }
+  .login-box{
+    padding:36px 24px 32px;
+    border-radius:22px;
+  }
+  .login-logo .logo-icon img,
+  .login-logo .logo-icon{
+    font-size:42px;
+  }
+  .login-logo h1{ font-size:26px; }
 }
 
 /* ── VERY SMALL (max 400px) ── */
