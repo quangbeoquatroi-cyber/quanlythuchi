@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Thu Chi Gia Đình 💕</title>
 <link rel="icon" type="image/png" href="assets/icon.png">
 <link rel="apple-touch-icon" href="assets/icon.png">
@@ -50,6 +50,10 @@ body{
 }
 button{font-family:inherit;cursor:pointer;border:none;outline:none}
 input,select,textarea{font-family:inherit;outline:none}
+/* iOS auto-zoom fix: font-size < 16px triggers zoom on focus */
+@media (max-width:768px){
+  input,select,textarea{ font-size:16px!important; }
+}
 a{text-decoration:none;color:inherit}
 
 /* ── SCROLLBAR ──────────────────────────────────────────── */
