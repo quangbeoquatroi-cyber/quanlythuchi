@@ -50,9 +50,10 @@ body{
 }
 button{font-family:inherit;cursor:pointer;border:none;outline:none}
 input,select,textarea{font-family:inherit;outline:none}
-/* iOS auto-zoom fix: font-size < 16px triggers zoom on focus */
+/* iOS auto-zoom fix: chỉ áp cho input/textarea khi focus, không đụng select */
 @media (max-width:768px){
-  input,select,textarea{ font-size:16px!important; }
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea{ font-size:16px!important; }
 }
 a{text-decoration:none;color:inherit}
 
@@ -1131,8 +1132,12 @@ a{text-decoration:none;color:inherit}
   .tx-act-btn{width:24px;height:24px;font-size:11px;border-radius:6px}
   .tx-day-group{padding:0 10px}
   .quy-tx-header{padding:11px 12px 9px}
-  .quy-filter-row{gap:5px;padding-bottom:3px;margin-bottom:10px}
-  .qf-select{font-size:11px;padding:6px 22px 6px 8px;max-width:105px}
+  .quy-filter-row{gap:4px;padding-bottom:3px;margin-bottom:10px}
+  .qf-select{font-size:10.5px;padding:5px 18px 5px 8px;max-width:82px;border-radius:6px}
+  .qf-select.qf-cat{min-width:95px}
+  .qf-select.qf-year{min-width:53px}
+  .qf-select.qf-month{min-width:61px}
+  .qf-btn-clear{font-size:9px;padding:4px 7px;border-radius:6px}
 
   /* Quy stats grid - keep 3 cols even on small mobile */
   .quy-stats-grid{grid-template-columns:repeat(3,1fr)!important}
@@ -1192,7 +1197,8 @@ a{text-decoration:none;color:inherit}
   .quy-stat-label{font-size:8.5px}
   .quy-stat-value{font-size:11px}
   .quy-filter-row{gap:4px}
-  .qf-select{font-size:10px;padding:5px 20px 5px 7px;max-width:95px}
+  .qf-select{font-size:9px;padding:3px 14px 3px 6px;max-width:72px}
+  .qf-btn-clear{font-size:9px;padding:3px 6px}
 }
 
 /* ── MENU TOGGLE (mobile only) ─────────────────────────── */
@@ -2503,7 +2509,7 @@ function openTxDetail(txId, quyKey) {
 
         <!-- Actions -->
         <div class="dtv-actions">
-          <button class="dtv-btn-outline" onclick="downloadReceipt('${txId}','${quyKey}')">
+          <button class="dtv-btn-outline" onclick="closeModalById('modal-detail')">
             ⬇️ Tải biên lai
           </button>
           <button class="dtv-btn-solid" onclick="closeModalById('modal-detail');openTxModal('${txId}','${quyKey}')">
@@ -2750,144 +2756,6 @@ function toast(msg, type='success') {
   el.innerHTML = `<span class="toast-icon">${icons[type]||'ℹ️'}</span><span class="toast-msg">${msg}</span><button class="toast-dismiss" onclick="this.parentElement.remove()">✕</button>`;
   c.appendChild(el);
   setTimeout(() => el.remove(), 3500);
-}
-
-// ── DOWNLOAD RECEIPT ─────────────────────────────────────
-function downloadReceipt(txId, quyKey) {
-  const q  = S.quyCache[quyKey];
-  const tx = (q?.transactions||[]).find(t => t.id === txId);
-  if(!tx) return;
-
-  const isIn     = tx.type === 'in';
-  const total    = (tx.amount_anh||0) + (tx.amount_em||0);
-  const typeLabel= isIn ? 'NẠP TIỀN' : 'CHI TIỀN';
-  const accentCol= isIn ? '#26d98b' : '#ff5252';
-  const quyName  = q.name || quyKey;
-
-  const W = 640, H = 900;
-  const canvas = document.createElement('canvas');
-  canvas.width  = W * 2; // retina
-  canvas.height = H * 2;
-  const ctx = canvas.getContext('2d');
-  ctx.scale(2, 2);
-
-  // ── Background
-  const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
-  bgGrad.addColorStop(0, '#071a14');
-  bgGrad.addColorStop(1, '#0d2318');
-  ctx.fillStyle = bgGrad;
-  ctx.roundRect(0, 0, W, H, 20);
-  ctx.fill();
-
-  // ── Top accent bar
-  const barGrad = ctx.createLinearGradient(0, 0, W, 0);
-  barGrad.addColorStop(0, accentCol);
-  barGrad.addColorStop(1, isIn ? '#00bfa5' : '#c62828');
-  ctx.fillStyle = barGrad;
-  ctx.fillRect(0, 0, W, 5);
-
-  // ── Header
-  ctx.fillStyle = accentCol + '22';
-  ctx.roundRect(24, 24, W - 48, 110, 14);
-  ctx.fill();
-
-  ctx.font = 'bold 13px sans-serif';
-  ctx.fillStyle = accentCol;
-  ctx.letterSpacing = '2px';
-  ctx.fillText(typeLabel, 40, 58);
-  ctx.letterSpacing = '0px';
-
-  ctx.font = 'bold 42px sans-serif';
-  ctx.fillStyle = accentCol;
-  ctx.fillText(fmtVND(total), 40, 105);
-
-  ctx.font = '13px sans-serif';
-  ctx.fillStyle = '#6b9e80';
-  ctx.fillText('📅 ' + fmtDate(tx.date), 40, 128);
-
-  // ── Divider with zigzag
-  const drawDivider = (y) => {
-    ctx.strokeStyle = '#1f5035';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([6, 4]);
-    ctx.beginPath();
-    ctx.moveTo(24, y);
-    ctx.lineTo(W - 24, y);
-    ctx.stroke();
-    ctx.setLineDash([]);
-  };
-
-  // ── Info rows
-  const rows = [
-    ['🏦', 'Quỹ',           quyName],
-    ['🗂️', 'Loại giao dịch', typeLabel],
-    ['📝', 'Mô tả',          tx.description || '—'],
-    ['👨', 'Anh đóng',       fmtVND(tx.amount_anh||0)],
-    ['💗', 'Em đóng',        fmtVND(tx.amount_em||0)],
-    ['📌', 'Danh mục',       tx.category || '—'],
-    ['💬', 'Ghi chú',        tx.note || '—'],
-  ];
-
-  let y = 155;
-  ctx.font = '13px sans-serif';
-  ctx.fillStyle = '#e8eaf6';
-  ctx.fillText('Thông tin giao dịch', 40, y);
-  ctx.fillStyle = accentCol;
-  ctx.fillRect(40, y + 6, 32, 2);
-  y += 24;
-
-  rows.forEach(([icon, label, val], i) => {
-    const rowY = y + i * 46;
-    // row bg
-    ctx.fillStyle = i % 2 === 0 ? '#0d2318' : '#112d1e';
-    ctx.fillRect(24, rowY - 14, W - 48, 40);
-
-    ctx.font = '15px sans-serif';
-    ctx.fillStyle = '#e8eaf6';
-    ctx.fillText(icon, 38, rowY + 10);
-
-    ctx.font = '13px sans-serif';
-    ctx.fillStyle = '#6b9e80';
-    ctx.fillText(label, 62, rowY + 10);
-
-    ctx.font = '600 13px sans-serif';
-    ctx.fillStyle = label === 'Anh đóng' ? '#2dd4a0'
-                  : label === 'Em đóng'  ? '#f9a825'
-                  : '#e8eaf6';
-    const valX = W - 28 - ctx.measureText(val).width;
-    ctx.fillText(val, valX, rowY + 10);
-  });
-
-  y += rows.length * 46 + 20;
-  drawDivider(y);
-  y += 24;
-
-  // ── Footer
-  ctx.font = 'bold 13px sans-serif';
-  ctx.fillStyle = '#e8eaf6';
-  ctx.fillText('✅ Giao dịch thành công', 40, y + 10);
-
-  ctx.font = '11px sans-serif';
-  ctx.fillStyle = '#6b9e80';
-  ctx.fillText('Thu Chi Gia Đình  •  ' + new Date().toLocaleString('vi-VN'), 40, y + 32);
-
-  // ── Watermark
-  ctx.save();
-  ctx.globalAlpha = 0.04;
-  ctx.font = 'bold 80px sans-serif';
-  ctx.fillStyle = accentCol;
-  ctx.translate(W/2, H/2);
-  ctx.rotate(-Math.PI / 6);
-  ctx.textAlign = 'center';
-  ctx.fillText('THU CHI', 0, 0);
-  ctx.restore();
-
-  // ── Download
-  const link = document.createElement('a');
-  link.download = `bien-lai-${txId}.png`;
-  link.href = canvas.toDataURL('image/png');
-  link.click();
-  toast('✅ Đã tải biên lai!');
 }
 </script>
 </body>
