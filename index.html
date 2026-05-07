@@ -297,141 +297,304 @@ a{text-decoration:none;color:inherit}
   overflow:hidden;
 }
 
-/* ── QUY PAGE ───────────────────────────────────────────── */
-.quy-header{
-  background:var(--s1);border:1px solid var(--border);
-  border-radius:var(--r);padding:20px 24px;margin-bottom:16px;
-}
-.quy-header-top{
-  display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;
-}
-.quy-title-area{display:flex;align-items:center;gap:12px}
-.quy-icon-big{font-size:32px}
-.quy-name{font-size:20px;font-weight:800}
-.quy-header-btns{display:flex;gap:8px}
-.btn-outline{
-  background:transparent;border:1px solid var(--border);
-  border-radius:var(--r2);padding:7px 14px;
-  font-size:13px;font-weight:700;color:var(--muted);
-  display:flex;align-items:center;gap:6px;
-  transition:all .15s;
-}
-.btn-outline:hover{background:var(--s3);color:var(--text);border-color:var(--border2)}
-.progress-bar-wrap{background:var(--s3);border-radius:100px;height:8px;overflow:hidden}
-.progress-bar-fill{height:100%;border-radius:100px;transition:width .5s ease}
-.progress-label{
-  display:flex;justify-content:space-between;
-  font-size:12px;color:var(--muted);margin-top:6px;
-}
-.quy-stats{
-  display:grid;grid-template-columns:repeat(3,1fr);
-  gap:12px;margin-bottom:16px;
-}
-.stat-card{
-  background:var(--s1);border:1px solid var(--border);
-  border-radius:var(--r2);padding:14px 16px;
-}
-.stat-card-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
-.stat-card-value{font-size:18px;font-weight:800}
-.stat-card-value.green{color:var(--green)}
-.stat-card-value.red{color:var(--red)}
-.stat-card-value.blue{color:var(--blue)}
-.stat-card-value.anh{color:var(--anh)}
-.stat-card-value.em{color:var(--em)}
-.stat-card-value.muted{color:var(--muted)}
+/* ══════════════════════════════════════════════════════════
+   QUỸ PAGE — REDESIGNED MOBILE-FIRST DESIGN SYSTEM
+   ══════════════════════════════════════════════════════════ */
 
-/* transaction table */
-/* ── TRANSACTION LIST (card-based, grouped by date) ─────── */
-.tx-table-wrap{
+/* ── QUY WRAPPER ── */
+.quy-page-wrap{
   display:flex;flex-direction:column;gap:0;
+  width:100%;box-sizing:border-box;
+  max-width:100%;overflow-x:hidden;
 }
-.tx-table-header{display:none}
-.tx-day-group{
+
+/* ── QUY HERO CARD ── */
+.quy-hero{
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:18px 16px 16px;
+  margin-bottom:12px;
+  width:100%;box-sizing:border-box;
+  overflow:hidden;
+  position:relative;
+}
+.quy-hero::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--quy-color,var(--anh));border-radius:16px 16px 0 0;
+}
+.quy-hero-top{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:10px;margin-bottom:14px;
+  flex-wrap:nowrap;
+}
+.quy-identity{display:flex;align-items:center;gap:10px;min-width:0;flex:1;}
+.quy-icon-pill{
+  width:44px;height:44px;border-radius:12px;flex-shrink:0;
+  background:rgba(255,255,255,.06);border:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+}
+.quy-name-wrap{min-width:0;flex:1;}
+.quy-name{font-size:17px;font-weight:800;color:var(--text);line-height:1.2;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.quy-subtitle{font-size:12px;color:var(--muted);margin-top:2px}
+.quy-hero-actions{display:flex;gap:6px;flex-shrink:0;}
+.quy-btn-cfg{
+  background:var(--s3);border:1px solid var(--border);
+  border-radius:8px;width:34px;height:34px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:var(--muted);cursor:pointer;transition:all .15s;
+}
+.quy-btn-cfg:hover{background:var(--s4);color:var(--text);border-color:var(--border2)}
+.quy-btn-add{
+  background:linear-gradient(135deg,var(--blue),#1565c0);
+  border-radius:8px;height:34px;padding:0 12px;flex-shrink:0;
+  display:flex;align-items:center;gap:5px;
+  font-size:12px;font-weight:800;color:#fff;cursor:pointer;
+  transition:opacity .15s;white-space:nowrap;border:none;
+}
+.quy-btn-add:hover{opacity:.88}
+
+/* ── PROGRESS SECTION ── */
+.quy-progress-wrap{margin-bottom:2px}
+.quy-progress-track{
+  background:var(--s3);border-radius:100px;height:6px;overflow:hidden;
+  width:100%;
+}
+.quy-progress-fill{
+  height:100%;border-radius:100px;
+  background:var(--quy-color,var(--anh));
+  transition:width .6s cubic-bezier(.4,0,.2,1);
+}
+.quy-progress-labels{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:5px;
+}
+.quy-progress-pct{
+  font-size:12px;font-weight:800;
+  color:var(--quy-color,var(--anh));
+}
+.quy-progress-amt{font-size:11px;color:var(--muted)}
+
+/* ── STATS GRID ── */
+.quy-stats-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;margin-bottom:12px;
+  width:100%;box-sizing:border-box;
+}
+.quy-stat{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:12px;padding:11px 10px;
+  display:flex;flex-direction:column;
+  min-width:0;box-sizing:border-box;
+  width:100%;
+}
+.quy-stat-label{
+  font-size:10px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.06em;
+  margin-bottom:5px;line-height:1.2;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.quy-stat-value{
+  font-size:13px;font-weight:800;
+  font-variant-numeric:tabular-nums;
+  line-height:1.2;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  word-break:break-word;
+}
+.quy-stat-value.sv-green{color:var(--green)}
+.quy-stat-value.sv-red{color:var(--red)}
+.quy-stat-value.sv-anh{color:var(--anh)}
+.quy-stat-value.sv-em{color:var(--em)}
+.quy-stat-value.sv-muted{color:var(--muted)}
+.quy-stat-value.sv-quy{color:var(--quy-color,var(--anh))}
+
+/* ── FILTER ROW ── */
+.quy-filter-row{
+  display:flex;align-items:center;gap:7px;
+  margin-bottom:12px;width:100%;box-sizing:border-box;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;padding-bottom:2px;
+}
+.quy-filter-row::-webkit-scrollbar{display:none}
+.qf-select{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:8px;padding:7px 28px 7px 10px;
+  color:var(--text);font-size:12px;font-family:inherit;
+  cursor:pointer;white-space:nowrap;flex-shrink:0;
+  -webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b9e80' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 8px center;
+  transition:border-color .15s;
+  min-width:0;max-width:130px;
+}
+.qf-select:focus{border-color:var(--anh);outline:none}
+.qf-select option{background:var(--s2)}
+.qf-btn-clear{
+  background:rgba(255,82,82,.1);border:1px solid rgba(255,82,82,.22);
+  border-radius:8px;padding:7px 10px;
+  color:var(--red);font-size:11px;font-weight:800;font-family:inherit;
+  cursor:pointer;white-space:nowrap;flex-shrink:0;
+  transition:all .15s;display:none;align-items:center;gap:4px;
+}
+.qf-btn-clear.qf-visible{display:flex}
+.qf-btn-clear:hover{background:rgba(255,82,82,.2)}
+.qf-count{
+  font-size:11px;color:var(--muted);
+  padding:4px 9px;background:var(--s2);border-radius:20px;
+  border:1px solid var(--border);white-space:nowrap;flex-shrink:0;
+}
+
+/* ── TRANSACTION SECTION ── */
+.quy-tx-section{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:16px;overflow:hidden;
+  width:100%;box-sizing:border-box;
+}
+.quy-tx-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 14px 11px;
+  border-bottom:1px solid var(--border);
+}
+.quy-tx-title{font-size:13px;font-weight:800;color:var(--text)}
+.quy-tx-count{
+  font-size:11px;color:var(--muted);
+  background:var(--s3);border-radius:20px;padding:2px 9px;
+  border:1px solid var(--border);
+}
+
+/* ── SCROLLABLE TRANSACTION CONTAINER ── */
+.quy-tx-scroll{
+  height:320px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;
+  scrollbar-color:var(--dim) transparent;
+}
+.quy-tx-scroll::-webkit-scrollbar{width:4px}
+.quy-tx-scroll::-webkit-scrollbar-track{background:transparent}
+.quy-tx-scroll::-webkit-scrollbar-thumb{background:var(--dim);border-radius:4px}
+.quy-tx-scroll::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+
+/* ── EMPTY / FILTER STATE ── */
+.quy-tx-empty{
+  padding:40px 20px;text-align:center;
+}
+.quy-tx-empty .ei{font-size:36px;display:block;margin-bottom:10px;opacity:.5}
+.quy-tx-empty .et{font-size:14px;font-weight:700;color:var(--text);opacity:.6;margin-bottom:4px}
+.quy-tx-empty .es{font-size:12px;color:var(--muted)}
+
+/* ── DAY GROUP ── */
+.tx-day-group{padding:0 12px;margin-top:10px;}
+.tx-day-group:first-child{margin-top:10px}
+.tx-day-group:last-child{margin-bottom:10px}
+.tx-day-label{
+  display:flex;align-items:center;gap:7px;
+  font-size:10px;font-weight:800;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.1em;
   margin-bottom:6px;
 }
-.tx-day-label{
-  display:flex;align-items:center;gap:8px;
-  padding:6px 4px 4px;
-  font-size:11px;font-weight:800;color:var(--muted);
-  text-transform:uppercase;letter-spacing:.1em;
-}
-.tx-day-label::after{
-  content:'';flex:1;height:1px;background:var(--border);
-}
-.tx-cards{
-  display:flex;flex-direction:column;gap:6px;
-}
+.tx-day-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── TRANSACTION ITEM ── */
+.tx-cards{display:flex;flex-direction:column;gap:5px;margin-bottom:4px}
 .tx-card{
-  display:flex;align-items:center;gap:12px;
-  background:var(--s1);border:1px solid var(--border);
-  border-radius:12px;padding:12px 14px;
-  transition:all .18s;cursor:default;
+  display:flex;align-items:center;gap:10px;
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:10px;padding:10px 11px;
   position:relative;overflow:hidden;
+  cursor:default;transition:background .15s,border-color .15s;
+  width:100%;box-sizing:border-box;min-height:56px;
 }
 .tx-card::before{
   content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
   background:var(--tx-accent,var(--border2));
-  border-radius:3px 0 0 3px;
+  border-radius:3px 0 0 3px;flex-shrink:0;
 }
-.tx-card:hover{
-  background:var(--s2);border-color:var(--border2);
-  transform:translateX(2px);
-  box-shadow:0 2px 12px rgba(0,0,0,.18);
-}
+.tx-card:hover{background:var(--s3);border-color:var(--border2)}
 .tx-card-icon{
-  width:36px;height:36px;border-radius:10px;
+  width:34px;height:34px;border-radius:9px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
-  font-size:16px;flex-shrink:0;
-  background:var(--s3);
+  font-size:15px;background:var(--s3);
 }
-.tx-card-body{flex:1;min-width:0;}
+.tx-card-body{flex:1;min-width:0;overflow:hidden;}
 .tx-card-title{
-  font-size:13px;font-weight:700;color:var(--text);
+  font-size:12px;font-weight:700;color:var(--text);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  max-width:100%;
+}
+.tx-card-meta{
+  display:flex;align-items:center;gap:5px;margin-top:3px;flex-wrap:nowrap;overflow:hidden;
 }
 .tx-card-note{
-  font-size:11px;color:var(--muted);margin-top:2px;
+  font-size:10px;color:var(--muted);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  max-width:100px;flex-shrink:1;
 }
 .tx-card-badge{
-  display:inline-flex;align-items:center;gap:3px;
-  font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;
-  margin-top:4px;text-transform:uppercase;letter-spacing:.05em;
+  display:inline-flex;align-items:center;gap:2px;flex-shrink:0;
+  font-size:9px;font-weight:800;padding:2px 6px;border-radius:20px;
+  text-transform:uppercase;letter-spacing:.04em;
 }
-.tx-badge-in{background:rgba(72,199,142,.15);color:var(--green);}
-.tx-badge-out{background:rgba(255,82,82,.12);color:var(--red);}
-.tx-badge-cat{background:rgba(255,214,0,.12);color:#f5c842;letter-spacing:.04em;}
+.tx-badge-in{background:rgba(38,217,139,.15);color:var(--green)}
+.tx-badge-out{background:rgba(255,82,82,.12);color:var(--red)}
+.tx-badge-cat{background:rgba(68,138,255,.12);color:var(--blue)}
+.tx-card-right{
+  display:flex;flex-direction:column;align-items:flex-end;
+  flex-shrink:0;gap:4px;min-width:0;
+}
 .tx-card-amt{
-  font-size:14px;font-weight:800;
-  font-family:'Courier New',monospace;
-  flex-shrink:0;text-align:right;
+  font-size:13px;font-weight:800;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
 }
-.tx-card-actions{
-  display:flex;gap:4px;flex-shrink:0;
-}
+.tx-type-in{color:var(--green)!important}
+.tx-type-out{color:var(--red)!important}
+.tx-card-actions{display:flex;gap:3px}
 .tx-act-btn{
   background:transparent;border:none;
-  width:28px;height:28px;border-radius:8px;
+  width:26px;height:26px;border-radius:7px;
   display:flex;align-items:center;justify-content:center;
-  font-size:13px;color:var(--dim);
-  transition:all .15s;cursor:pointer;
+  font-size:12px;color:var(--dim);
+  transition:all .15s;cursor:pointer;flex-shrink:0;
 }
 .tx-act-btn:hover{background:var(--s4);color:var(--text)}
 .tx-act-btn.del:hover{color:var(--red);background:rgba(255,82,82,.1)}
+
+/* ── LEGACY COMPAT SHIMS (keep old classes working) ── */
+.btn-outline{
+  background:transparent;border:1px solid var(--border);
+  border-radius:var(--r2);padding:7px 14px;
+  font-size:13px;font-weight:700;color:var(--muted);
+  display:flex;align-items:center;gap:6px;transition:all .15s;
+}
+.btn-outline:hover{background:var(--s3);color:var(--text);border-color:var(--border2)}
+.progress-bar-wrap{background:var(--s3);border-radius:100px;height:8px;overflow:hidden}
+.progress-bar-fill{height:100%;border-radius:100px;transition:width .5s ease}
+.progress-label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:6px}
+.quy-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.stat-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px}
+.stat-card-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.stat-card-value{font-size:18px;font-weight:800}
+.stat-card-value.green{color:var(--green)}.stat-card-value.red{color:var(--red)}.stat-card-value.blue{color:var(--blue)}.stat-card-value.anh{color:var(--anh)}.stat-card-value.em{color:var(--em)}.stat-card-value.muted{color:var(--muted)}
 .cat-badge{
   font-size:11px;font-weight:700;
   padding:3px 8px;border-radius:20px;
   background:var(--s3);color:var(--muted);
   display:inline-block;white-space:nowrap;
 }
-.tx-type-in{color:var(--green)!important}
-.tx-type-out{color:var(--red)!important}
+
+/* tx-type shims for backward compat */
 .tx-col-date{display:none}
 .tx-col-desc{display:none}
 .tx-col-anh{display:none}
 .tx-col-em{display:none}
 .tx-col-cat{display:none}
 .tx-col-actions{display:none}
+.filter-bar{display:none!important}
+.tx-table-wrap{display:none!important}
 
 /* ── MODALS ─────────────────────────────────────────────── */
 .modal-overlay{
@@ -679,20 +842,27 @@ a{text-decoration:none;color:inherit}
   .mc-section{padding:10px 12px}
   .mc-row{font-size:12px}
 
-  /* Quy page */
-  .quy-header{padding:14px 16px}
-  .quy-name{font-size:16px}
-  .quy-icon-big{font-size:24px}
-  .quy-stats{grid-template-columns:repeat(2,1fr);gap:8px}
-  .stat-card{padding:10px 12px}
-  .stat-card-value{font-size:15px}
+  /* Quy page mobile */
+  .quy-hero{padding:14px 12px 12px}
+  .quy-icon-pill{width:38px;height:38px;font-size:17px;border-radius:10px}
+  .quy-name{font-size:15px}
+  .quy-stats-grid{grid-template-columns:repeat(3,1fr);gap:6px}
+  .quy-stat{padding:9px 8px;border-radius:10px}
+  .quy-stat-label{font-size:9px}
+  .quy-stat-value{font-size:12px}
+  .quy-tx-scroll{height:280px}
+  .tx-card{padding:8px 9px;gap:8px;min-height:50px}
+  .tx-card-icon{width:30px;height:30px;font-size:13px;border-radius:8px}
+  .tx-card-title{font-size:11px}
+  .tx-card-amt{font-size:12px}
+  .tx-act-btn{width:24px;height:24px;font-size:11px;border-radius:6px}
+  .tx-day-group{padding:0 10px}
+  .quy-tx-header{padding:11px 12px 9px}
+  .quy-filter-row{gap:5px;padding-bottom:3px}
+  .qf-select{font-size:11px;padding:6px 24px 6px 8px;max-width:110px}
 
-  /* Transaction cards - mobile responsive */
-  .tx-card{padding:10px 12px;gap:10px;}
-  .tx-card-icon{width:32px;height:32px;font-size:14px;}
-  .tx-card-title{font-size:12px;}
-  .tx-card-amt{font-size:13px;}
-  .tx-act-btn{width:26px;height:26px;font-size:12px;}
+  /* Quy stats grid - keep 3 cols even on small mobile */
+  .quy-stats-grid{grid-template-columns:repeat(3,1fr)!important}
 
   /* Modals */
   .modal-overlay{padding:0;align-items:flex-end}
@@ -724,7 +894,12 @@ a{text-decoration:none;color:inherit}
 @media(max-width:400px){
   .mc-summary{grid-template-columns:1fr}
   .mc-sum-col:first-child{border-right:none;border-bottom:1px solid var(--border)}
-  .quy-stats{grid-template-columns:1fr 1fr}
+  .quy-stats-grid{grid-template-columns:repeat(3,1fr)!important;gap:5px}
+  .quy-stat{padding:8px 6px;border-radius:9px}
+  .quy-stat-label{font-size:8.5px}
+  .quy-stat-value{font-size:11px}
+  .quy-filter-row{gap:4px}
+  .qf-select{font-size:10px;padding:5px 20px 5px 7px;max-width:95px}
 }
 
 /* ── MENU TOGGLE (mobile only) ─────────────────────────── */
@@ -1082,7 +1257,30 @@ const S = {
   editTxId: null,
   editTxQuyId: null,
   editCfgQuyId: null,
+  // filter state per quy page
+  filters: {},
 };
+
+function getFilter(key) {
+  if(!S.filters[key]) S.filters[key] = { type: '', cat: '', year: '', month: '' };
+  return S.filters[key];
+}
+
+function setFilter(key, field, value) {
+  getFilter(key)[field] = value;
+  renderQuy(key);
+}
+
+function clearFilter(key) {
+  S.filters[key] = { type: '', cat: '', year: '', month: '' };
+  // reset DOM inputs (new quy filter row)
+  const wrap = document.getElementById('page-'+key);
+  if(wrap) {
+    const selects = wrap.querySelectorAll('.qf-select');
+    selects.forEach(s => { s.value = ''; });
+  }
+  renderQuy(key);
+}
 
 // ── HELPERS ──────────────────────────────────────────────
 const fmtVND = n => {
@@ -1509,40 +1707,64 @@ function renderQuy(key) {
     el.innerHTML = `<div class="empty-state"><span class="empty-icon">⏳</span><h3>Đang tải...</h3></div>`;
     return;
   }
-  const txs = q.transactions || [];
-  const totalIn    = txs.filter(t=>t.type==='in').reduce((s,t)=>s+(t.amount_anh||0)+(t.amount_em||0),0);
-  const totalOut   = txs.filter(t=>t.type==='out').reduce((s,t)=>s+(t.amount_anh||0)+(t.amount_em||0),0);
-  const balance    = totalIn - totalOut;
-  const target     = q.target || 0;
-  const pct        = target > 0 ? Math.min(100, Math.round(balance/target*100)) : 0;
-  const anhIn      = txs.filter(t=>t.type==='in').reduce((s,t)=>s+(t.amount_anh||0),0);
-  const emIn       = txs.filter(t=>t.type==='in').reduce((s,t)=>s+(t.amount_em||0),0);
-  const lacking    = Math.max(0, target - balance);
 
-  const txRows = (() => {
-    const sorted = [...txs].sort((a,b)=> b.date.localeCompare(a.date));
-    if(!sorted.length) return `<div style="padding:32px;text-align:center;color:var(--muted);font-size:13px">Chưa có giao dịch nào</div>`;
+  const txs     = q.transactions || [];
+  const totalIn  = txs.filter(t=>t.type==='in').reduce((s,t)=>s+(t.amount_anh||0)+(t.amount_em||0),0);
+  const totalOut = txs.filter(t=>t.type==='out').reduce((s,t)=>s+(t.amount_anh||0)+(t.amount_em||0),0);
+  const balance  = totalIn - totalOut;
+  const target   = q.target || 0;
+  const pct      = target > 0 ? Math.min(100, Math.round(balance/target*100)) : 0;
+  const anhIn    = txs.filter(t=>t.type==='in').reduce((s,t)=>s+(t.amount_anh||0),0);
+  const emIn     = txs.filter(t=>t.type==='in').reduce((s,t)=>s+(t.amount_em||0),0);
+  const lacking  = Math.max(0, target - balance);
+  const qColor   = q.color || 'var(--anh)';
+
+  const cats  = [...new Set(txs.map(t=>t.category||'').filter(Boolean))].sort();
+  const years = [...new Set(txs.map(t=>(t.date||'').slice(0,4)).filter(Boolean))].sort((a,b)=>b-a);
+
+  const f = getFilter(key);
+  const hasFilter = !!(f.type || f.cat || f.year || f.month);
+
+  let filtered = [...txs];
+  if(f.type)  filtered = filtered.filter(t => t.type === f.type);
+  if(f.cat)   filtered = filtered.filter(t => (t.category||'') === f.cat);
+  if(f.year)  filtered = filtered.filter(t => (t.date||'').startsWith(f.year));
+  if(f.month) filtered = filtered.filter(t => { const p=(t.date||'').split('-'); return p[1]===f.month; });
+
+  const sorted = [...filtered].sort((a,b)=> (b.date||'').localeCompare(a.date||''));
+
+  const txHTML = (() => {
+    if(!sorted.length) {
+      if(hasFilter) return `<div class="quy-tx-empty"><span class="ei">🔍</span><div class="et">Không tìm thấy kết quả</div><div class="es">Thử thay đổi bộ lọc</div></div>`;
+      return `<div class="quy-tx-empty"><span class="ei">💸</span><div class="et">Chưa có giao dịch nào</div><div class="es">Nhấn "+ Giao dịch" để thêm</div></div>`;
+    }
     const groups = {};
-    sorted.forEach(t => { const d = t.date||''; if(!groups[d]) groups[d]=[]; groups[d].push(t); });
+    sorted.forEach(t => { const d=t.date||''; if(!groups[d]) groups[d]=[]; groups[d].push(t); });
     return Object.keys(groups).sort((a,b)=>b.localeCompare(a)).map(date => {
-      const label = date ? (([y,m,d2]) => `${d2}/${m}/${y}`)(date.split('-')) : '—';
+      const [y,m,d2] = date ? date.split('-') : ['','',''];
+      const label = date ? `${d2}/${m}/${y}` : '—';
       const cards = groups[date].map(t => {
         const isIn = t.type==='in';
         const totalAmt = (t.amount_anh||0)+(t.amount_em||0);
         const accent = isIn?'var(--green)':'var(--red)';
-        const emoji = isIn?'📥':'📤';
+        const emoji  = isIn?'📥':'📤';
+        const catOrType = (t.category||'') ? `<span class="tx-card-badge tx-badge-cat">${t.category}</span>` : `<span class="tx-card-badge ${isIn?'tx-badge-in':'tx-badge-out'}">${isIn?'Nạp':'Chi'}</span>`;
         return `<div class="tx-card" style="--tx-accent:${accent}">
           <div class="tx-card-icon">${emoji}</div>
           <div class="tx-card-body">
             <div class="tx-card-title">${t.description||'—'}</div>
-            ${t.note?`<div class="tx-card-note">${t.note}</div>`:''}
-            ${(t.category||'') ? `<span class="tx-card-badge tx-badge-cat">${t.category}</span>` : `<span class="tx-card-badge ${isIn?'tx-badge-in':'tx-badge-out'}">${isIn?'+ Nạp':'− Chi'}</span>`}
+            <div class="tx-card-meta">
+              ${catOrType}
+              ${t.note?`<span class="tx-card-note">· ${t.note}</span>`:''}
+            </div>
           </div>
-          <div class="tx-card-amt ${isIn?'tx-type-in':'tx-type-out'}">${totalAmt?fmtVND(totalAmt):'—'}</div>
-          <div class="tx-card-actions">
-            <button class="tx-act-btn" onclick="openTxDetail('${t.id}','${key}')" title="Xem chi tiết">🔍</button>
-            <button class="tx-act-btn" onclick="openTxModal('${t.id}','${key}')" title="Sửa">✏️</button>
-            <button class="tx-act-btn del" onclick="confirmDeleteTx('${t.id}','${key}')" title="Xóa">🗑</button>
+          <div class="tx-card-right">
+            <div class="tx-card-amt ${isIn?'tx-type-in':'tx-type-out'}">${totalAmt?fmtVND(totalAmt):'—'}</div>
+            <div class="tx-card-actions">
+              <button class="tx-act-btn" onclick="openTxDetail('${t.id}','${key}')" title="Xem chi tiết">🔍</button>
+              <button class="tx-act-btn" onclick="openTxModal('${t.id}','${key}')" title="Sửa">✏️</button>
+              <button class="tx-act-btn del" onclick="confirmDeleteTx('${t.id}','${key}')" title="Xóa">🗑</button>
+            </div>
           </div>
         </div>`;
       }).join('');
@@ -1550,40 +1772,106 @@ function renderQuy(key) {
     }).join('');
   })();
 
+  const catOptions   = cats.map(c => `<option value="${c}" ${f.cat===c?'selected':''}>${c}</option>`).join('');
+  const yearOptions  = years.map(y => `<option value="${y}" ${f.year===y?'selected':''}>${y}</option>`).join('');
+  const monthOptions = Array.from({length:12},(_,i)=>{const m=String(i+1).padStart(2,'0');return `<option value="${m}" ${f.month===m?'selected':''}>T${i+1}</option>`;}).join('');
+
+  const progressHTML = target > 0 ? `
+    <div class="quy-progress-wrap">
+      <div class="quy-progress-track">
+        <div class="quy-progress-fill" style="width:${pct}%"></div>
+      </div>
+      <div class="quy-progress-labels">
+        <span class="quy-progress-pct">${pct}% đạt mục tiêu</span>
+        <span class="quy-progress-amt">${fmtVND(balance)} / ${fmtVND(target)}</span>
+      </div>
+    </div>` : '';
+
+  const lackingDisplay = lacking > 0 ? fmtVND(lacking) : '✅ Đủ';
+
   el.innerHTML = `
-  <div class="quy-header">
-    <div class="quy-header-top">
-      <div class="quy-title-area">
-        <span class="quy-icon-big">${q.icon||'💰'}</span>
-        <div>
-          <div class="quy-name">${q.name}</div>
-          ${target>0?`<div style="font-size:12px;color:var(--muted)">Mục tiêu: ${fmtVND(target)}</div>`:''}
+  <div class="quy-page-wrap" style="--quy-color:${qColor}">
+
+    <!-- Hero Card -->
+    <div class="quy-hero">
+      <div class="quy-hero-top">
+        <div class="quy-identity">
+          <div class="quy-icon-pill">${q.icon||'💰'}</div>
+          <div class="quy-name-wrap">
+            <div class="quy-name">${q.name}</div>
+            ${target>0?`<div class="quy-subtitle">Mục tiêu: ${fmtVND(target)}</div>`:'<div class="quy-subtitle">Quỹ chung</div>'}
+          </div>
+        </div>
+        <div class="quy-hero-actions">
+          <button class="quy-btn-cfg" onclick="openQuyConfig('${key}')" title="Cài đặt">⚙️</button>
+          <button class="quy-btn-add" onclick="openTxModal(null,'${key}')">+ Giao dịch</button>
         </div>
       </div>
-      <div class="quy-header-btns">
-        <button class="btn-outline" onclick="openQuyConfig('${key}')">⚙️ Cài đặt</button>
-        <button class="btn-primary btn-quy" onclick="openTxModal(null,'${key}')">+ Giao dịch</button>
+      ${progressHTML}
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="quy-stats-grid">
+      <div class="quy-stat">
+        <div class="quy-stat-label">📥 Đã nạp</div>
+        <div class="quy-stat-value sv-green">${fmtVND(totalIn)}</div>
+      </div>
+      <div class="quy-stat">
+        <div class="quy-stat-label">📤 Đã chi</div>
+        <div class="quy-stat-value sv-red">${fmtVND(totalOut)}</div>
+      </div>
+      <div class="quy-stat">
+        <div class="quy-stat-label">💰 Còn lại</div>
+        <div class="quy-stat-value sv-quy">${fmtVND(balance)}</div>
+      </div>
+      <div class="quy-stat">
+        <div class="quy-stat-label">👨 Anh đóng</div>
+        <div class="quy-stat-value sv-anh">${fmtVND(anhIn)}</div>
+      </div>
+      <div class="quy-stat">
+        <div class="quy-stat-label">👩 Em đóng</div>
+        <div class="quy-stat-value sv-em">${fmtVND(emIn)}</div>
+      </div>
+      <div class="quy-stat">
+        <div class="quy-stat-label">⚠️ Còn thiếu</div>
+        <div class="quy-stat-value ${lacking>0?'sv-muted':'sv-green'}">${lackingDisplay}</div>
       </div>
     </div>
-    ${target>0?`
-    <div class="progress-bar-wrap">
-      <div class="progress-bar-fill" style="width:${pct}%;background:${q.color||'var(--anh)'}"></div>
+
+    <!-- Filter Row -->
+    <div class="quy-filter-row" id="qfr-${key}">
+      <select class="qf-select qf-year" onchange="setFilter('${key}','year',this.value)">
+        <option value="" ${!f.year?'selected':''}>Năm</option>
+        ${yearOptions}
+      </select>
+      <select class="qf-select qf-month" onchange="setFilter('${key}','month',this.value)">
+        <option value="" ${!f.month?'selected':''}>Tháng</option>
+        ${monthOptions}
+      </select>
+      <select class="qf-select qf-type" onchange="setFilter('${key}','type',this.value)">
+        <option value="" ${!f.type?'selected':''}>Loại</option>
+        <option value="in" ${f.type==='in'?'selected':''}>📥 Nạp</option>
+        <option value="out" ${f.type==='out'?'selected':''}>📤 Chi</option>
+      </select>
+      ${cats.length?`<select class="qf-select qf-cat" onchange="setFilter('${key}','cat',this.value)">
+        <option value="" ${!f.cat?'selected':''}>Danh mục</option>
+        ${catOptions}
+      </select>`:''}
+      <button class="qf-btn-clear ${hasFilter?'qf-visible':''}" onclick="clearFilter('${key}')">✕ Xóa</button>
+      ${hasFilter?`<span class="qf-count">${filtered.length} kết quả</span>`:''}
     </div>
-    <div class="progress-label">
-      <span style="color:${q.color||'var(--anh)'};font-weight:700">${pct}% đạt mục tiêu</span>
-      <span>${fmtVND(balance)} / ${fmtVND(target)}</span>
-    </div>`:''}
-  </div>
-  <div class="quy-stats">
-    <div class="stat-card"><div class="stat-card-label">📥 Đã nạp</div><div class="stat-card-value green font-mono">${fmtVND(totalIn)}</div></div>
-    <div class="stat-card"><div class="stat-card-label">📤 Đã chi</div><div class="stat-card-value red font-mono">${fmtVND(totalOut)}</div></div>
-    <div class="stat-card"><div class="stat-card-label">💰 Còn lại</div><div class="stat-card-value font-mono" style="color:${q.color||'var(--anh)'}">${fmtVND(balance)}</div></div>
-    <div class="stat-card"><div class="stat-card-label">👨 Anh đóng</div><div class="stat-card-value anh font-mono">${fmtVND(anhIn)}</div></div>
-    <div class="stat-card"><div class="stat-card-label">👩 Em đóng</div><div class="stat-card-value em font-mono">${fmtVND(emIn)}</div></div>
-    <div class="stat-card"><div class="stat-card-label">⚠️ Còn thiếu</div><div class="stat-card-value muted font-mono">${lacking>0?fmtVND(lacking):'Đã đủ 🎉'}</div></div>
-  </div>
-  <div class="tx-table-wrap">
-    ${txRows}
+
+    <!-- Transaction Container -->
+    <div class="quy-tx-section">
+      <div class="quy-tx-header">
+        <span class="quy-tx-title">📋 Lịch sử giao dịch</span>
+        <span class="quy-tx-count">${sorted.length} giao dịch</span>
+      </div>
+      <div class="quy-tx-scroll" id="qtx-${key}">
+        ${txHTML}
+      </div>
+    </div>
+
   </div>`;
 }
 
