@@ -2336,7 +2336,8 @@ async function doLogin() {
 }
 
 // ── INACTIVITY AUTO-LOGOUT (30 phút) ─────────────────────
-const IDLE_TIMEOUT = 30 * 60 * 1000; // 30 phút
+//const IDLE_TIMEOUT = 30 * 60 * 1000; // 30 phút
+const IDLE_TIMEOUT = 5 * 60 * 1000; // 5 phút  
 const WARN_BEFORE  =  2 * 60 * 1000; //  2 phút trước sẽ cảnh báo
 let idleTimer   = null;
 let warnTimer   = null;
