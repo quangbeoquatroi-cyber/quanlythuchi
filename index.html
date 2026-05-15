@@ -344,7 +344,9 @@ a{text-decoration:none;color:inherit}
 .sidebar{
   width:var(--sidebar);min-width:var(--sidebar);
   height:100vh;position:fixed;top:0;left:0;
-  background:var(--s1);border-right:1px solid var(--border);
+  background:linear-gradient(180deg,#0d2318 0%,#081410 100%);
+  border-right:1px solid rgba(45,212,160,.13);
+  box-shadow:4px 0 28px rgba(0,0,0,.55), 8px 0 48px rgba(0,0,0,.25), 1px 0 0 rgba(45,212,160,.07);
   display:flex;flex-direction:column;
   z-index:100;overflow-y:auto;
 }
@@ -356,7 +358,8 @@ a{text-decoration:none;color:inherit}
 /* ── SIDEBAR ────────────────────────────────────────────── */
 .sidebar-brand{
   padding:20px 16px 16px;
-  border-bottom:1px solid var(--border);
+  border-bottom:1px solid rgba(45,212,160,.1);
+  background:linear-gradient(180deg, rgba(22,56,38,.18) 0%, transparent 100%);
   flex-shrink:0;
   display:flex;flex-direction:column;align-items:center;
 }
@@ -386,15 +389,20 @@ a{text-decoration:none;color:inherit}
 .nav-item.active-em{background:rgba(236,64,122,.12);color:var(--em)}
 .nav-item .nav-icon{font-size:16px;width:20px;text-align:center}
 .sidebar-footer{
-  padding:12px 8px;border-top:1px solid var(--border);flex-shrink:0;
+  padding:12px 8px;
+  border-top:1px solid rgba(45,212,160,.09);
+  background:linear-gradient(0deg, rgba(7,26,20,.6) 0%, transparent 100%);
+  flex-shrink:0;
 }
 .nav-item.logout{color:var(--muted)}
 .nav-item.logout:hover{color:var(--red);background:rgba(255,82,82,.08)}
 
 /* ── TOPBAR ─────────────────────────────────────────────── */
 .topbar{
-  height:var(--topbar);background:var(--s1);
-  border-bottom:1px solid var(--border);
+  height:var(--topbar);
+  background:linear-gradient(180deg, rgba(13,35,24,.98) 0%, rgba(10,26,18,.99) 100%);
+  border-bottom:1px solid rgba(45,212,160,.11);
+  box-shadow:0 2px 16px rgba(0,0,0,.45), 0 4px 32px rgba(0,0,0,.22), 0 1px 0 rgba(45,212,160,.07);
   display:flex;align-items:center;justify-content:space-between;
   padding:0 24px;position:sticky;top:0;z-index:50;
   flex-shrink:0;
@@ -2327,11 +2335,90 @@ async function doLogin() {
   }
 }
 
+// ── INACTIVITY AUTO-LOGOUT (30 phút) ─────────────────────
+const IDLE_TIMEOUT = 30 * 60 * 1000; // 30 phút
+const WARN_BEFORE  =  2 * 60 * 1000; //  2 phút trước sẽ cảnh báo
+let idleTimer   = null;
+let warnTimer   = null;
+let idleWarning = null; // toast element
+
+const IDLE_EVENTS = ['mousemove','mousedown','keydown','touchstart','touchmove','scroll','click','wheel'];
+
+function resetIdleTimer() {
+  clearTimeout(idleTimer);
+  clearTimeout(warnTimer);
+  dismissIdleWarning();
+
+  // Bắt đầu đếm cảnh báo
+  warnTimer = setTimeout(showIdleWarning, IDLE_TIMEOUT - WARN_BEFORE);
+  // Bắt đầu đếm logout
+  idleTimer = setTimeout(async () => {
+    dismissIdleWarning();
+    // Hiện toast thông báo trước khi logout
+    toast('⏱️ Phiên đã hết hạn do không hoạt động. Đang đăng xuất...', 'info');
+    await new Promise(r => setTimeout(r, 1500));
+    await sb.auth.signOut();
+  }, IDLE_TIMEOUT);
+}
+
+function showIdleWarning() {
+  // Xoá toast cũ nếu có
+  dismissIdleWarning();
+  const c = document.getElementById('toast-container');
+  if (!c) return;
+  idleWarning = document.createElement('div');
+  idleWarning.className = 'toast info idle-warn-toast';
+  idleWarning.style.cssText = 'border-color:rgba(249,168,37,.4);box-shadow:0 8px 32px rgba(249,168,37,.15),0 0 0 1px rgba(249,168,37,.2)!important;min-width:260px;';
+  idleWarning.innerHTML = `
+    <span class="toast-icon">⏰</span>
+    <span class="toast-msg">
+      Bạn sắp bị đăng xuất do không hoạt động.<br>
+      <span id="idle-countdown" style="font-weight:800;color:#f9a825;">2:00</span> còn lại
+    </span>
+    <button class="toast-dismiss" onclick="resetIdleTimer()" style="background:rgba(249,168,37,.15);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:800;color:#f9a825;border:1px solid rgba(249,168,37,.3);">Vẫn ở đây</button>
+  `;
+  c.appendChild(idleWarning);
+
+  // Đếm ngược
+  let remaining = WARN_BEFORE / 1000;
+  const tick = setInterval(() => {
+    remaining--;
+    const el = document.getElementById('idle-countdown');
+    if (!el) { clearInterval(tick); return; }
+    const m = Math.floor(remaining / 60);
+    const s = remaining % 60;
+    el.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+    if (remaining <= 0) clearInterval(tick);
+  }, 1000);
+  idleWarning._tick = tick;
+}
+
+function dismissIdleWarning() {
+  if (idleWarning) {
+    if (idleWarning._tick) clearInterval(idleWarning._tick);
+    idleWarning.remove();
+    idleWarning = null;
+  }
+}
+
+function startIdleWatcher() {
+  IDLE_EVENTS.forEach(ev => document.addEventListener(ev, resetIdleTimer, { passive: true }));
+  resetIdleTimer();
+}
+
+function stopIdleWatcher() {
+  IDLE_EVENTS.forEach(ev => document.removeEventListener(ev, resetIdleTimer));
+  clearTimeout(idleTimer);
+  clearTimeout(warnTimer);
+  dismissIdleWarning();
+}
+
 async function doSignOut() {
   await sb.auth.signOut();
 }
 
 function showLogin() {
+  stopIdleWatcher();
   document.getElementById('screen-login').style.display = 'flex';
   document.getElementById('screen-app').classList.remove('active');
 }
@@ -2344,6 +2431,7 @@ document.getElementById('login-pass').addEventListener('keydown', e => {
 async function initApp() {
   document.getElementById('screen-login').style.display = 'none';
   document.getElementById('screen-app').classList.add('active');
+  startIdleWatcher();
   await Promise.all([
     loadBDTYear('anh', S.year),
     loadBDTYear('em',  S.year),
@@ -3127,7 +3215,139 @@ function openTxDetail(txId, quyKey) {
         display:flex;align-items:center;justify-content:center;gap:6px;
       }
       .dtv-btn-solid:hover{opacity:.88}
-    </style>
+    
+/* ── SIDEBAR & TOPBAR EXTRA POLISH ─────────────────────── */
+
+/* Topbar title glow */
+.topbar-title {
+  font-size:17px;font-weight:800;
+  text-shadow: 0 0 24px rgba(45,212,160,.25), 0 1px 6px rgba(0,0,0,.5);
+  letter-spacing: .01em;
+}
+
+/* Topbar — subtle inner highlight on top edge */
+.topbar::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(45,212,160,.3) 30%, rgba(249,168,37,.2) 70%, transparent 100%);
+  pointer-events:none;
+}
+.topbar { position:sticky; top:0; z-index:50; isolation:isolate; }
+
+/* Sidebar — right edge glow streak */
+.sidebar::after {
+  content:'';
+  position:absolute; top:15%; right:0; width:1px; height:70%;
+  background: linear-gradient(180deg, transparent 0%, rgba(45,212,160,.25) 35%, rgba(249,168,37,.18) 65%, transparent 100%);
+  pointer-events:none;
+}
+
+/* Sidebar brand logo glow */
+.sidebar-brand .brand-icon {
+  filter: drop-shadow(0 0 10px rgba(45,212,160,.3)) drop-shadow(0 2px 6px rgba(0,0,0,.4));
+}
+.sidebar-brand h2 {
+  text-shadow: 0 0 20px rgba(45,212,160,.2);
+}
+
+/* Nav section labels more visible */
+.nav-section-label {
+  font-size:10px;font-weight:800;color:rgba(45,212,160,.35);
+  text-transform:uppercase;letter-spacing:.14em;
+  padding:14px 10px 5px;
+  border-top: 1px solid rgba(45,212,160,.06);
+  margin-top: 4px;
+}
+.nav-section-label:first-child { border-top: none; margin-top: 0; }
+
+/* Nav items — background gradient + left indicator */
+.nav-item {
+  position: relative;
+}
+.nav-item.active::before,
+.nav-item.active-anh::before {
+  content:'';
+  position:absolute; left:0; top:15%; bottom:15%; width:3px;
+  background: linear-gradient(180deg, rgba(45,212,160,.8), rgba(45,212,160,.4));
+  border-radius: 0 3px 3px 0;
+  box-shadow: 0 0 8px rgba(45,212,160,.4);
+}
+.nav-item.active-em::before {
+  content:'';
+  position:absolute; left:0; top:15%; bottom:15%; width:3px;
+  background: linear-gradient(180deg, rgba(249,168,37,.8), rgba(249,168,37,.4));
+  border-radius: 0 3px 3px 0;
+  box-shadow: 0 0 8px rgba(249,168,37,.35);
+}
+
+/* Nav hover — subtle right-side highlight */
+.nav-item:hover {
+  background: linear-gradient(90deg, rgba(45,212,160,.07) 0%, rgba(45,212,160,.03) 100%) !important;
+}
+.nav-item.active,
+.nav-item.active-anh {
+  background: linear-gradient(90deg, rgba(45,212,160,.14) 0%, rgba(45,212,160,.05) 100%) !important;
+  box-shadow: inset 0 1px 0 rgba(45,212,160,.08), inset 0 -1px 0 rgba(0,0,0,.1) !important;
+}
+.nav-item.active-em {
+  background: linear-gradient(90deg, rgba(249,168,37,.12) 0%, rgba(249,168,37,.04) 100%) !important;
+}
+
+/* Logout item separator */
+.nav-item.logout {
+  border-top: 1px solid rgba(45,212,160,.06);
+  margin-top: 2px;
+  padding-top: 10px;
+}
+
+/* Year nav buttons depth */
+.year-btn {
+  background: linear-gradient(135deg, var(--s3), var(--s2)) !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.05) !important;
+}
+.year-label {
+  text-shadow: 0 0 16px rgba(45,212,160,.2);
+  font-weight:800;
+}
+
+/* Refresh button depth */
+.btn-refresh {
+  background: linear-gradient(135deg, var(--s3), var(--s2)) !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.05) !important;
+}
+
+/* Add month button extra glow */
+.btn-primary {
+  position:relative;
+}
+.btn-primary::after {
+  content:'';
+  position:absolute; inset:0;
+  border-radius: inherit;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.15), inset 0 -1px 0 rgba(0,0,0,.15);
+  pointer-events:none;
+}
+
+/* Mobile bottom nav — stronger glass */
+@media (max-width:700px) {
+  .sidebar {
+    background: rgba(9,22,15,.92) !important;
+    backdrop-filter: blur(24px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
+    border-top: 1px solid rgba(45,212,160,.14) !important;
+    box-shadow: 0 -4px 32px rgba(0,0,0,.55), 0 -8px 48px rgba(0,0,0,.2) !important;
+  }
+  .topbar {
+    background: rgba(10,24,17,.92) !important;
+    backdrop-filter: blur(24px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
+  }
+  .nav-item.active::before,
+  .nav-item.active-anh::before,
+  .nav-item.active-em::before { display:none; }
+}
+
+</style>
 
     <div class="${variantClass}">
       <div class="dtv-body">
