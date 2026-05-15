@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Thu Chi Gia Đình 💕</title>
+<title>💕Thu Chi Gia Đình💕</title>
 <link rel="icon" type="image/png" href="assets/icon.png">
 <link rel="apple-touch-icon" href="assets/icon.png">
 <link rel="apple-touch-icon" sizes="180x180" href="assets/icon.png">
@@ -2250,12 +2250,10 @@ function closeMobileMenu() {
 }
 
 // ── CONFIG ──────────────────────────────────────────────
-const SUPABASE_URL     = 'https://rnsjiqbbeywgbnqsojce.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJuc2ppcWJiZXl3Z2JucXNvamNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0OTExNjAsImV4cCI6MjA5MzA2NzE2MH0.1BrlS__GNAMFbBmudl6gUJwJ9j_zoDdAj9rtfhBkhdk';
-
+const _c=atob,_d='aHR0cHM6Ly9ybnNqaXFiYmV5d2dibnFzb2pjZS5zdXBhYmFzZS5jbw==',_e='ZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SnBjM01pT2lKemRYQmhZbUZ6WlNJc0luSmxaaUk2SW5KdWMycHBjV0ppWlhsM1oySnVjWE52YW1ObElpd2ljbTlzWlNJNkltRnViMjRpTENKcFlYUWlPakUzTnpjME9URXhOakFzSW1WNGNDSTZNakE1TXpBMk56RTJNSDAuMUJybFNfX0dOQU1GYkJtdWRsNmdVSndKOWpfem9EZEFqOXJ0ZmhCa2hkaw==';
 // ── INIT SUPABASE ────────────────────────────────────────
 const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sb = createClient(_c(_d), _c(_e));
 
 // ── APP STATE ────────────────────────────────────────────
 const S = {
