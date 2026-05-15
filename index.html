@@ -820,25 +820,18 @@ a{text-decoration:none;color:inherit}
 .tx-badge-cat{background:rgba(68,138,255,.12);color:var(--blue)}
 .tx-card-right{
   display:flex;flex-direction:column;align-items:flex-end;
-  flex-shrink:0;gap:10px;min-width:0;
-  padding-left:6px;
+  flex-shrink:0;gap:4px;min-width:0;
 }
 .tx-card-amt{
   font-size:13px;font-weight:800;
   font-variant-numeric:tabular-nums;
-  white-space:nowrap;line-height:1.1;
-  margin-bottom:2px;
+  white-space:nowrap;
 }
 .tx-type-in{color:var(--green)!important}
 .tx-type-out{color:var(--red)!important}
-.tx-card-actions{
-  display:flex;gap:6px;
-  padding-top:4px;
-  border-top:1px solid rgba(255,255,255,.05);
-  width:100%;justify-content:flex-end;
-}
+.tx-card-actions{display:flex;gap:3px}
 .tx-act-btn{
-  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.04);
+  background:transparent;border:none;
   width:26px;height:26px;border-radius:7px;
   display:flex;align-items:center;justify-content:center;
   font-size:12px;color:var(--dim);
@@ -1981,196 +1974,6 @@ select.field-input option{background:var(--s2)}
   }
   .modal {
     box-shadow: 0 -8px 40px rgba(0,0,0,.6), 0 0 0 1px rgba(45,212,160,.12) !important;
-  }
-}
-
-/* ════════════════ 3D LUXURY THEME (CARDS & BUTTONS) ════════════════ */
-:root{
-  --3d-bevel-light: rgba(255,255,255,.08);
-  --3d-bevel-dark: rgba(0,0,0,.55);
-  --3d-glow: rgba(45,212,160,.18);
-}
-
-/* ---- 3D CARDS ---- */
-.month-card,
-.dtv-card,
-.tq-card,
-.quy-stat,
-.quy-hero,
-.quy-tx-section,
-.dtv-bal-item,
-.tq-stat-block,
-.skeleton-card,
-.login-box{
-  position: relative;
-  border-radius: 16px;
-  background:
-    linear-gradient(160deg, rgba(255,255,255,.04) 0%, rgba(255,255,255,0) 38%),
-    linear-gradient(180deg, var(--s3) 0%, var(--s2) 55%, var(--s1) 100%);
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.06) inset,
-    0 -1px 0 rgba(0,0,0,.5) inset,
-    0 0 0 1px rgba(255,255,255,.04),
-    0 18px 38px -18px rgba(0,0,0,.75),
-    0 8px 16px -10px rgba(0,0,0,.55);
-  transition: transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s ease;
-}
-.month-card::before,
-.dtv-card::before,
-.tq-card::before,
-.quy-hero::before,
-.quy-tx-section::before,
-.login-box::before{
-  content:"";
-  position:absolute; inset:0;
-  border-radius: inherit;
-  background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,0) 30%);
-  pointer-events:none;
-  mix-blend-mode: screen;
-  opacity:.7;
-}
-.month-card:hover,
-.dtv-card:hover,
-.tq-card:hover{
-  transform: translateY(-2px);
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.08) inset,
-    0 -1px 0 rgba(0,0,0,.55) inset,
-    0 0 0 1px rgba(45,212,160,.18),
-    0 26px 48px -20px rgba(0,0,0,.8),
-    0 12px 22px -12px rgba(0,0,0,.6);
-}
-
-/* small stat tiles get a subtler depth */
-.quy-stat,
-.dtv-bal-item,
-.tq-stat-block,
-.mc-footer-stat{
-  border-radius: 12px;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,0) 40%),
-    linear-gradient(180deg, var(--s3), var(--s2));
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.06) inset,
-    0 -1px 0 rgba(0,0,0,.55) inset,
-    0 0 0 1px rgba(255,255,255,.03),
-    0 10px 22px -12px rgba(0,0,0,.7);
-}
-
-/* ---- 3D BUTTONS ---- */
-.btn-primary,
-.btn-save,
-.btn-cancel,
-.btn-refresh,
-.add-item-btn,
-.dtv-btn-solid,
-.dtv-btn-outline,
-.mc-btn,
-.quy-btn-add,
-.quy-btn-cfg,
-.login-btn,
-.qf-btn-clear,
-.item-del{
-  position: relative;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,.06);
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.18) inset,
-    0 -2px 0 rgba(0,0,0,.45) inset,
-    0 6px 14px -6px rgba(0,0,0,.6),
-    0 2px 4px rgba(0,0,0,.35);
-  transition: transform .12s ease, box-shadow .18s ease, filter .18s ease;
-  text-shadow: 0 1px 0 rgba(0,0,0,.25);
-}
-.btn-primary,
-.btn-save,
-.dtv-btn-solid,
-.quy-btn-add,
-.login-btn,
-.add-item-btn{
-  background-image: linear-gradient(180deg, #34e7ad 0%, #26d98b 50%, #1fb774 100%);
-  color:#06231a;
-  border-color: rgba(0,0,0,.25);
-}
-.btn-cancel,
-.dtv-btn-outline,
-.quy-btn-cfg,
-.btn-refresh,
-.mc-btn{
-  background-image: linear-gradient(180deg, var(--s4) 0%, var(--s3) 50%, var(--s2) 100%);
-  color: var(--text);
-}
-.item-del,
-.qf-btn-clear{
-  background-image: linear-gradient(180deg, #ff7373 0%, #ff5252 50%, #d63b3b 100%);
-  color:#fff;
-  border-color: rgba(0,0,0,.3);
-}
-
-.btn-primary:hover,.btn-save:hover,.btn-cancel:hover,.btn-refresh:hover,
-.add-item-btn:hover,.dtv-btn-solid:hover,.dtv-btn-outline:hover,
-.mc-btn:hover,.quy-btn-add:hover,.quy-btn-cfg:hover,
-.login-btn:hover,.qf-btn-clear:hover,.item-del:hover{
-  transform: translateY(-1px);
-  filter: brightness(1.06);
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.22) inset,
-    0 -2px 0 rgba(0,0,0,.5) inset,
-    0 10px 20px -8px rgba(0,0,0,.7),
-    0 3px 6px rgba(0,0,0,.4);
-}
-.btn-primary:active,.btn-save:active,.btn-cancel:active,.btn-refresh:active,
-.add-item-btn:active,.dtv-btn-solid:active,.dtv-btn-outline:active,
-.mc-btn:active,.quy-btn-add:active,.quy-btn-cfg:active,
-.login-btn:active,.qf-btn-clear:active,.item-del:active{
-  transform: translateY(1px);
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.10) inset,
-    0 -1px 0 rgba(0,0,0,.4) inset,
-    0 3px 8px -4px rgba(0,0,0,.6);
-  filter: brightness(.97);
-}
-
-/* nav items as soft 3D pills when active */
-.nav-item.active{
-  background-image: linear-gradient(180deg, rgba(45,212,160,.18), rgba(45,212,160,.06));
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.08) inset,
-    0 -1px 0 rgba(0,0,0,.4) inset,
-    0 8px 18px -10px rgba(0,0,0,.6);
-  border-radius: 12px;
-}
-
-/* progress bar gets glossy depth */
-.quy-progress-track{
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.05) inset,
-    0 2px 6px rgba(0,0,0,.5) inset !important;
-}
-.quy-progress-fill{
-  background-image: linear-gradient(180deg, #4ff0bd, #26d98b 60%, #1fb774) !important;
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.35) inset,
-    0 -1px 0 rgba(0,0,0,.25) inset,
-    0 0 12px rgba(45,212,160,.45);
-}
-
-/* badges/status chips */
-.dtv-badge,.dtv-status,.dtv-type{
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.10) inset,
-    0 -1px 0 rgba(0,0,0,.35) inset,
-    0 4px 10px -6px rgba(0,0,0,.55);
-  border-radius: 8px;
-}
-
-/* reduce motion */
-@media (prefers-reduced-motion: reduce){
-  .month-card,.dtv-card,.tq-card,
-  .btn-primary,.btn-save,.btn-cancel,.btn-refresh,.add-item-btn,
-  .dtv-btn-solid,.dtv-btn-outline,.mc-btn,.quy-btn-add,.quy-btn-cfg,
-  .login-btn,.qf-btn-clear,.item-del{
-    transition: none !important;
   }
 }
 
