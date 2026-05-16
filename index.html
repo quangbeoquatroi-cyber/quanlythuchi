@@ -2058,10 +2058,10 @@ select.field-input option{background:var(--s2)}
   display: block;
 }
 .mc-btn-duplicate {
-  background: transparent;
+  background: var(--s3);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 5px 11px;
+  padding: 5px 10px;
   color: var(--muted);
   font-size: 12px;
   font-weight: 700;
@@ -2070,16 +2070,16 @@ select.field-input option{background:var(--s2)}
   display: flex;
   align-items: center;
   gap: 5px;
-  transition: all .2s cubic-bezier(.22,1,.36,1) !important;
+  transition: all .15s !important;
   position: relative;
   overflow: hidden;
 }
 .mc-btn-duplicate:hover {
-  background: rgba(45,212,160,.12) !important;
-  border-color: rgba(45,212,160,.45) !important;
-  color: var(--anh) !important;
-  transform: translateY(-1px) scale(1.03);
-  box-shadow: 0 4px 14px rgba(45,212,160,.2);
+  background: var(--s4);
+  border-color: var(--border2);
+  color: var(--text);
+  transform: none;
+  box-shadow: none;
 }
 .mc-btn-duplicate:active { transform: scale(.97); }
 .mc-btn-duplicate:disabled {
