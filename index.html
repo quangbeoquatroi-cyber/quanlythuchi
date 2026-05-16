@@ -1977,6 +1977,129 @@ select.field-input option{background:var(--s2)}
   }
 }
 
+
+/* ── DUPLICATE MODAL — Month picker grid ─────────────────── */
+.dup-month-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 4px;
+}
+@media (max-width: 480px) {
+  .dup-month-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+}
+.dup-month-btn {
+  background: var(--s3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 8px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: center;
+  transition: all .2s cubic-bezier(.22,1,.36,1);
+  position: relative;
+  overflow: hidden;
+}
+.dup-month-btn:hover:not(:disabled) {
+  background: var(--s4);
+  border-color: var(--anh);
+  color: var(--anh);
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 6px 20px rgba(45,212,160,.25), 0 0 0 1px rgba(45,212,160,.3);
+}
+.dup-month-btn:active:not(:disabled) { transform: scale(.97); }
+.dup-month-btn:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+  background: var(--s2);
+  border-color: var(--border);
+  color: var(--muted);
+}
+.dup-month-btn .dup-exists-label {
+  display: block;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-top: 3px;
+}
+.dup-source-banner {
+  background: var(--s3);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.dup-source-icon { font-size: 26px; flex-shrink: 0; }
+.dup-source-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: 3px;
+}
+.dup-source-month { font-size: 16px; font-weight: 800; color: var(--anh); }
+.dup-source-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.dup-pick-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: 10px;
+  display: block;
+}
+.mc-btn-duplicate {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 11px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all .2s cubic-bezier(.22,1,.36,1) !important;
+  position: relative;
+  overflow: hidden;
+}
+.mc-btn-duplicate:hover {
+  background: rgba(45,212,160,.12) !important;
+  border-color: rgba(45,212,160,.45) !important;
+  color: var(--anh) !important;
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: 0 4px 14px rgba(45,212,160,.2);
+}
+.mc-btn-duplicate:active { transform: scale(.97); }
+.mc-btn-duplicate:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+@keyframes newCardGlow {
+  0%   { box-shadow: 0 0 0 0 rgba(45,212,160,0); }
+  20%  { box-shadow: 0 0 0 4px rgba(45,212,160,.35), 0 0 40px rgba(45,212,160,.25); border-color: var(--anh); }
+  60%  { box-shadow: 0 0 0 6px rgba(45,212,160,.2), 0 0 60px rgba(45,212,160,.15); border-color: rgba(45,212,160,.6); }
+  100% { box-shadow: 0 0 0 0 rgba(45,212,160,0); border-color: var(--border); }
+}
+.month-card-new-glow {
+  animation:
+    slideInUp .45s cubic-bezier(.22,1,.36,1) both,
+    newCardGlow 2s ease .45s forwards !important;
+}
+
 </style>
 </head>
 <body>
@@ -2228,6 +2351,32 @@ select.field-input option{background:var(--s2)}
       <button class="btn-save btn-quy-save" id="btn-save-cfg" onclick="saveQuyConfig()">
         <span>💾 Lưu</span>
       </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Duplicate Month Modal -->
+<div class="modal-overlay" id="modal-duplicate" onclick="closeModal(event,'modal-duplicate')">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <div class="modal-title">📑 Duplicate Tháng</div>
+      <button class="modal-close" onclick="closeModalById('modal-duplicate')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="dup-source-banner">
+        <div class="dup-source-icon">📅</div>
+        <div class="dup-source-info">
+          <div class="dup-source-label">Sao chép từ</div>
+          <div class="dup-source-month" id="dup-source-text">Tháng —</div>
+          <div class="dup-source-sub" id="dup-source-sub">— khoản thu · — khoản chi</div>
+        </div>
+      </div>
+      <span class="dup-pick-label">Chọn tháng muốn tạo</span>
+      <div class="dup-month-grid" id="dup-month-grid"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModalById('modal-duplicate')">Hủy</button>
     </div>
   </div>
 </div>
@@ -2712,6 +2861,13 @@ function renderMonthCard(owner, year, month) {
   const badgeCls     = remaining >= 0 ? 'mc-badge-ok' : 'mc-badge-over';
   const badgeTxt     = remaining >= 0 ? '✓ Ổn' : '⚠ Vượt';
 
+  // Kiểm tra còn tháng trống không → để quyết định disable nút Duplicate
+  const availableMonths = getAvailableMonths(owner, year);
+  const canDuplicate    = availableMonths.length > 0;
+  const dupTitle        = canDuplicate
+    ? `Duplicate Tháng ${month} sang tháng khác`
+    : 'Đã tạo đủ 13 tháng';
+
   const incomeRows = incomes.map(i => `
     <div class="mc-row">
       <span class="mc-row-name">${i.name}</span>
@@ -2729,6 +2885,12 @@ function renderMonthCard(owner, year, month) {
       <span class="mc-title">Tháng ${month}${month===13?' 🎁':''}</span>
       <span class="mc-badge ${badgeCls}">${badgeTxt}</span>
       <button class="mc-btn" onclick="openMonthModal('${owner}',${year},${month})">✏️ Sửa</button>
+      <button
+        class="mc-btn mc-btn-duplicate"
+        onclick="showDuplicateModal('${owner}',${year},${month})"
+        ${!canDuplicate ? 'disabled' : ''}
+        title="${dupTitle}"
+      >📑 Duplicate</button>
       <button class="mc-btn" onclick="toggleMonthDetail('${owner}',${year},${month})">
         ${isOpen ? '✕ Ẩn bớt' : '☰ Chi tiết'}
       </button>
@@ -2781,11 +2943,13 @@ function toggleMonthDetail(owner, year, month) {
     S.expandedCards.add(key);
     el.classList.add('open');
   }
-  // Update button text
+  // Cập nhật text nút Chi tiết — nút cuối cùng trong mc-header
+  // Thứ tự: Sửa[0], Duplicate[1], Chi tiết[2]
   const card = document.getElementById(`mc-${owner}-${year}-${month}`);
   if(card) {
     const btns = card.querySelectorAll('.mc-btn');
-    if(btns[1]) btns[1].textContent = S.expandedCards.has(key) ? '✕ Ẩn bớt' : '☰ Chi tiết';
+    const detailBtn = btns[btns.length - 1]; // luôn là nút cuối
+    if(detailBtn) detailBtn.textContent = S.expandedCards.has(key) ? '✕ Ẩn bớt' : '☰ Chi tiết';
   }
 }
 
@@ -3809,6 +3973,199 @@ function toast(msg, type='success') {
   c.appendChild(el);
   setTimeout(() => el.remove(), 3500);
 }
+
+// ════════════════════════════════════════════════════════════
+// DUPLICATE MONTH FEATURE
+// Tương thích hoàn toàn với kiến trúc hiện tại:
+//   - S.bdtCache[owner][year][month]
+//   - saveBDTMonth(owner, year, month, incomeItems, expenseItems)
+//   - renderBDT(owner) + renderMonthCard(owner, year, month)
+//   - toast(), openModalById(), closeModalById()
+// ════════════════════════════════════════════════════════════
+
+// State riêng cho duplicate
+const DUP = {
+  owner: null,   // 'anh' | 'em'
+  year:  null,   // number
+  month: null,   // number — tháng nguồn
+};
+
+/**
+ * 1. getExistingMonths(owner, year)
+ *    Trả về array các tháng ĐÃ tồn tại trong cache.
+ *    Ví dụ: [1, 2, 3, 4, 5]
+ */
+function getExistingMonths(owner, year) {
+  const yearData = (S.bdtCache[owner] || {})[year] || {};
+  return Object.keys(yearData).map(Number).sort((a, b) => a - b);
+}
+
+/**
+ * 2. getAvailableMonths(owner, year)
+ *    Trả về array các tháng CHƯA tồn tại (1-13).
+ *    Ví dụ: [6, 7, 8, 9, 10, 11, 12, 13]
+ */
+function getAvailableMonths(owner, year) {
+  const existing = new Set(getExistingMonths(owner, year));
+  return Array.from({ length: 13 }, (_, i) => i + 1).filter(m => !existing.has(m));
+}
+
+/**
+ * 3. showDuplicateModal(owner, year, sourceMonth)
+ *    Mở modal duplicate, populate grid tháng có thể chọn.
+ */
+function showDuplicateModal(owner, year, sourceMonth) {
+  DUP.owner = owner;
+  DUP.year  = year;
+  DUP.month = sourceMonth;
+
+  // Cập nhật banner thông tin tháng nguồn
+  const sourceData   = ((S.bdtCache[owner] || {})[year] || {})[sourceMonth];
+  const incomeCount  = sourceData ? sourceData.items.filter(i => i.type === 'income').length  : 0;
+  const expenseCount = sourceData ? sourceData.items.filter(i => i.type === 'expense').length : 0;
+  document.getElementById('dup-source-text').textContent =
+    `Tháng ${sourceMonth}${sourceMonth === 13 ? ' 🎁' : ''} — ${year}`;
+  document.getElementById('dup-source-sub').textContent =
+    `${incomeCount} khoản thu · ${expenseCount} khoản chi`;
+
+  // Render grid tháng
+  renderDuplicateMonthGrid(owner, year, sourceMonth);
+  openModalById('modal-duplicate');
+}
+
+/**
+ * Helper: render 13 nút tháng trong modal — disabled nếu đã tồn tại
+ */
+function renderDuplicateMonthGrid(owner, year, sourceMonth) {
+  const available = getAvailableMonths(owner, year);
+  const grid = document.getElementById('dup-month-grid');
+
+  grid.innerHTML = Array.from({ length: 13 }, (_, i) => {
+    const m = i + 1;
+    const isAvailable = available.includes(m);
+    const isSource    = m === sourceMonth;
+    const label       = m === 13 ? '🎁 T13' : `Tháng ${m}`;
+    const existsNote  = !isAvailable ? '<span class="dup-exists-label">Đã có</span>' : '';
+    const isDisabled  = !isAvailable || isSource;
+    const titleText   = isSource
+      ? 'Đây là tháng nguồn'
+      : (!isAvailable ? 'Tháng này đã tồn tại' : `Duplicate sang tháng ${m}`);
+
+    return `
+      <button
+        class="dup-month-btn"
+        ${isDisabled ? 'disabled' : ''}
+        onclick="duplicateMonth(${m})"
+        title="${titleText}"
+      >${label}${existsNote}</button>`;
+  }).join('');
+}
+
+/**
+ * 4. duplicateMonth(targetMonth)
+ *    Clone data từ tháng nguồn → lưu tháng mới → re-render → glow → scroll.
+ */
+async function duplicateMonth(targetMonth) {
+  const { owner, year, month: sourceMonth } = DUP;
+
+  // Validation
+  if (!owner || !year || !sourceMonth) {
+    toast('Lỗi: Thiếu thông tin nguồn duplicate', 'error');
+    return;
+  }
+  const sourceData = ((S.bdtCache[owner] || {})[year] || {})[sourceMonth];
+  if (!sourceData) {
+    toast('Lỗi: Không tìm thấy dữ liệu tháng nguồn', 'error');
+    return;
+  }
+  const existing = getExistingMonths(owner, year);
+  if (existing.includes(targetMonth)) {
+    toast(`Tháng ${targetMonth} đã tồn tại!`, 'error');
+    return;
+  }
+
+  // Clone DATA — chỉ copy name & amount, KHÔNG copy id/month_id/created_at/updated_at
+  const incomeItems  = sourceData.items
+    .filter(i => i.type === 'income')
+    .map(i => ({ name: i.name, amount: i.amount }));
+  const expenseItems = sourceData.items
+    .filter(i => i.type === 'expense')
+    .map(i => ({ name: i.name, amount: i.amount }));
+
+  // Đóng modal ngay để UX mượt
+  closeModalById('modal-duplicate');
+
+  // Toast loading tạm thời
+  const loadingEl = showLoadingToast(`Đang tạo Tháng ${targetMonth}...`);
+
+  try {
+    // 5. saveData() — lưu Supabase qua hàm saveBDTMonth hiện có
+    // saveBDTMonth cũng tự update S.bdtCache[owner][year][targetMonth]
+    await saveBDTMonth(owner, year, targetMonth, incomeItems, expenseItems);
+
+    loadingEl.remove();
+    toast(`✅ Đã duplicate Tháng ${sourceMonth} → Tháng ${targetMonth}`, 'success');
+
+    // Re-render đúng thứ tự + highlight card mới bằng glow
+    renderBDTAndHighlight(owner, year, targetMonth);
+
+    // 7. scrollToMonthCard sau khi DOM update
+    setTimeout(() => scrollToMonthCard(owner, year, targetMonth), 120);
+
+  } catch (err) {
+    loadingEl.remove();
+    console.error('Duplicate month error:', err);
+    toast(err.message || 'Có lỗi xảy ra khi duplicate tháng', 'error');
+  }
+}
+
+/**
+ * 5. renderBDTAndHighlight(owner, year, newMonth)
+ *    Gọi renderBDT() rồi add class glow cho card mới.
+ *    renderBDT sẽ render đúng thứ tự tháng (sort descending).
+ */
+function renderBDTAndHighlight(owner, year, newMonth) {
+  renderBDT(owner);
+
+  // Double rAF để đảm bảo DOM đã paint xong
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const cardEl = document.getElementById(`mc-${owner}-${year}-${newMonth}`);
+      if (cardEl) {
+        cardEl.classList.add('month-card-new-glow');
+        setTimeout(() => cardEl.classList.remove('month-card-new-glow'), 3000);
+      }
+    });
+  });
+}
+
+/**
+ * 7. scrollToMonthCard(owner, year, month)
+ *    Scroll tới card mới với smooth behavior.
+ */
+function scrollToMonthCard(owner, year, month) {
+  const cardEl = document.getElementById(`mc-${owner}-${year}-${month}`);
+  if (!cardEl) return;
+  cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/**
+ * Helper: hiển thị loading toast (không auto-xóa).
+ * Trả về DOM element để caller xóa khi xong.
+ */
+function showLoadingToast(msg) {
+  const c  = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = 'toast info';
+  el.innerHTML = `
+    <span class="toast-icon">
+      <div class="spinner" style="width:14px;height:14px;border-width:2px;border-top-color:var(--blue);"></div>
+    </span>
+    <span class="toast-msg">${msg}</span>`;
+  c.appendChild(el);
+  return el;
+}
+
+// ── END DUPLICATE MONTH FEATURE ──────────────────────────
+
 </script>
-</body>
-</html>
